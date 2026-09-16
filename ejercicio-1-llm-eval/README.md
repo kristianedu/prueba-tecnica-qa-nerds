@@ -51,6 +51,36 @@ Son 71 llamadas por corrida (30 del asistente, 30 del juez, 11 del usuario
 simulado — los 19 turnos literales no gastan ninguna) y unos 6 minutos. La caché
 en disco hace que una segunda corrida idéntica salga gratis e instantánea.
 
+### Sobre las cuotas de Groq
+
+El tier gratuito limita por modelo, y la corrida completa consume bastante: el
+juez lee la rúbrica, la base de conocimiento y todo el historial en cada uno de
+los 30 turnos.
+
+| Modelo | Peticiones/día | Tokens/día |
+|---|---|---|
+| `openai/gpt-oss-120b` | 1K | 200K |
+| `openai/gpt-oss-20b` | 1K | 200K |
+| `qwen/qwen3.8-27b` | 1K | 200K |
+| `groq/compound` y `-mini` | 250 | *sin límite* |
+
+**Cuidado con ese "sin límite".** Los modelos *compound* son sistemas agénticos
+que por debajo llaman a `openai/gpt-oss-120b`, así que consumen su cuota: al
+pedirles una evaluación con la cuota del 120b agotada, el error que devuelven
+menciona al 120b, no al compound. No sirven para esquivar el tope.
+
+Cada modelo con cuota propia la tiene separada, así que repartir roles entre dos
+modelos distintos duplica el presupuesto efectivo:
+
+```bash
+.venv/bin/python src/runner.py --todos --proveedor groq --sin-cache \
+    --modelo openai/gpt-oss-20b \
+    --modelo-juez qwen/qwen3.8-27b
+```
+
+Si la cuota se agota a mitad, el runner lo dice explícitamente —cuánto llevas
+consumido y qué alternativas tienes— en vez de dejar un error del SDK en crudo.
+
 ### 3. Leer las conversaciones ya evaluadas
 
 Para revisar una entrega sin ejecutar nada ni tener credenciales:

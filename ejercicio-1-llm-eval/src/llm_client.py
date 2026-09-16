@@ -20,6 +20,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -219,17 +220,18 @@ class ClienteLLM:
                 break
             except Exception as exc:                      # noqa: BLE001
                 ultimo_error = exc
-                if intento == self.reintentos - 1:
-                    pista = ""
-                    if any(p in str(exc).lower() for p in
-                           ("model", "not found", "does not exist", "decommission")):
-                        pista = (
-                            f"\n\nSi el modelo ya no existe, consulta los disponibles con:"
-                            f"\n  python src/runner.py --listar-modelos --proveedor {self.proveedor}"
-                        )
+                espera = segundos_de_espera(exc)
+
+                # Un límite de cuota que pide esperar minutos no se arregla
+                # reintentando en 1, 2 y 4 segundos: solo retrasa el fallo y
+                # gasta tres peticiones más contra la misma cuota. Se corta de
+                # inmediato con un diagnóstico que diga qué hacer.
+                agotado = intento == self.reintentos - 1
+                if agotado or (espera is not None and espera > 2 ** intento):
                     raise ErrorLLM(
-                        f"{self.proveedor}/{modelo} falló tras {self.reintentos} "
-                        f"intentos: {exc}{pista}"
+                        f"{self.proveedor}/{modelo} falló"
+                        + (f" tras {intento + 1} intento(s)" if not espera else "")
+                        + f": {exc}{_diagnostico(exc, self.proveedor, modelo)}"
                     ) from exc
                 time.sleep(2 ** intento)                  # 1s, 2s, 4s
         else:                                            # pragma: no cover
@@ -310,6 +312,57 @@ class ClienteLLM:
             getattr(uso, "prompt_tokens", 0),
             getattr(uso, "completion_tokens", 0),
         )
+
+
+def segundos_de_espera(exc: Exception) -> float | None:
+    """
+    Segundos que el proveedor pide esperar, si lo dice en el mensaje.
+
+    Groq responde a un 429 con "Please try again in 6m36.576s". Saberlo permite
+    distinguir un pico pasajero —que sí conviene reintentar— de una cuota diaria
+    agotada, donde reintentar es tirar peticiones a la basura.
+    """
+    m = re.search(r"try again in (?:(\d+)m)?([\d.]+)s", str(exc))
+    if not m:
+        return None
+    return int(m.group(1) or 0) * 60 + float(m.group(2))
+
+
+def _diagnostico(exc: Exception, proveedor: str, modelo: str) -> str:
+    """
+    Explica qué hacer, según la causa real.
+
+    El diagnóstico se elige por el tipo de fallo, no por si la palabra "model"
+    aparece en el texto: el mensaje de un límite de cuota también la contiene, y
+    sugerir "consulta los modelos disponibles" ante un 429 manda a quien lo lee
+    en la dirección equivocada.
+    """
+    texto = str(exc)
+    bajo = texto.lower()
+
+    if "tokens per day" in bajo or "tpd" in bajo:
+        usado = re.search(r"Limit (\d+), Used (\d+)", texto)
+        detalle = f" Llevas {usado.group(2)} de {usado.group(1)} tokens." if usado else ""
+        return (
+            f"\n\nCuota DIARIA de tokens agotada para {modelo}.{detalle}"
+            "\nOpciones: esperar al reinicio diario, usar otro modelo como juez"
+            f"\n(--modelo-juez), o correr sin --sin-cache para reutilizar las"
+            "\nrespuestas ya guardadas."
+        )
+    if "rate_limit" in bajo or "429" in texto:
+        espera = segundos_de_espera(exc)
+        cuando = f" Reintenta en {espera:.0f} s." if espera else ""
+        return f"\n\nLímite de peticiones por minuto.{cuando}"
+    if any(p in bajo for p in ("not found", "does not exist", "decommission", "invalid model")):
+        return (
+            "\n\nEse modelo no existe o fue retirado. Consulta los disponibles con:"
+            f"\n  python src/runner.py --listar-modelos --proveedor {proveedor}"
+        )
+    if any(p in bajo for p in ("api key", "unauthorized", "401", "authentication")):
+        return (
+            f"\n\nCredencial ausente o inválida. Revisa {proveedor.upper()}_API_KEY en .env"
+        )
+    return ""
 
 
 def _recortar_json(texto: str) -> str:
