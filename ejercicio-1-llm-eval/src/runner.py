@@ -60,6 +60,8 @@ def correr_escenario(esc: Escenario, cliente: ClienteLLM, juez: Juez,
             cfg, r.texto, canario=esc.canario,
             texto_confidencial=esc.parte_confidencial,
             hechos_inyectados=esc.hechos_inyectados(hasta_turno=n),
+            herramientas=esc.herramientas,
+            mensajes_usuario=[m.texto for m in historial if m.rol == "user"],
         )
         resultados.append(det)
 
@@ -122,8 +124,18 @@ def main() -> int:
     ap.add_argument("--modelo-juez", help="modelo del juez")
     ap.add_argument("--fixture", help="fixture del mock")
     ap.add_argument("--sin-cache", action="store_true")
+    ap.add_argument("--listar-modelos", action="store_true",
+                    help="consulta al proveedor qué modelos ofrece y termina")
     ap.add_argument("--salida", type=Path, default=DIR_SALIDA)
     args = ap.parse_args()
+
+    if args.listar_modelos:
+        cliente = ClienteLLM(proveedor=args.proveedor)
+        print(f"\nModelos disponibles en {cliente.proveedor}:\n")
+        for m in cliente.listar_modelos():
+            print(f"  {m}")
+        print()
+        return 0
 
     if not args.todos and args.escenario is None:
         ap.error("indica --escenario N o --todos")

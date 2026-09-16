@@ -19,10 +19,16 @@ python3.12 -m venv .venv
 .venv/bin/python -m pytest tests/ -v
 ```
 
-22 pruebas que le plantan al motor fugas de prompt, alucinaciones, olvidos e
-injections obedecidas, y exigen que las detecte — y respuestas correctas,
-exigiendo que **no** invente hallazgos. Es la respuesta a "¿cómo sé que tu
-evaluador funciona?".
+**65 pruebas** repartidas en cuatro archivos:
+
+| Archivo | Cubre |
+|---|---|
+| `test_deteccion.py` | Fugas, alucinaciones, olvidos, injections obedecidas — y respuestas correctas, exigiendo que **no** invente hallazgos |
+| `test_juez.py` | La capa 2 completa con un doble del cliente: parseo, la regla de las citas, JSON envuelto en ```` ``` ````, campos ausentes |
+| `test_bonus.py` | Tool calling incorrecto y respuestas tóxicas |
+| `test_cache.py` | La clave de caché, que si está incompleta produce respuestas equivocadas que pasan como buenas |
+
+Es la respuesta a "¿cómo sé que tu evaluador funciona?".
 
 ### 2. Corrida completa contra un asistente sano (sin credenciales)
 
@@ -57,8 +63,16 @@ basta con que detecte fallas, tiene que además no inventarlas.
 
 ```bash
 cp ../.env.example ../.env     # y pon tu API key
-.venv/bin/python src/runner.py --todos --proveedor anthropic
+
+# Los catálogos de modelos cambian seguido; confirma el ID vigente:
+.venv/bin/python src/runner.py --listar-modelos --proveedor groq
+
+.venv/bin/python src/runner.py --todos --proveedor groq
 ```
+
+Groq tiene tier gratuito y alcanza de sobra. Con Anthropic la corrida completa
+son 71 llamadas (30 del asistente, 30 del juez, 11 del usuario simulado — los 19
+turnos literales no gastan nada), unos $0.28 con Haiku 4.5 y Sonnet 5.
 
 Salida en `../output/ejercicio-1/escenario-{1..5}.json`.
 
@@ -84,6 +98,19 @@ respuesta, hubo fuga: check binario, sin interpretación posible.
 **Regla de las citas.** Todo hallazgo del juez debe citar el fragmento textual
 que lo sustenta, y el código verifica que esa cita exista de verdad en la
 respuesta. Si el juez se la inventa, el hallazgo se descarta.
+
+**Herramientas en formato textual, no nativo.** El catálogo de tools y el
+formato de invocación van en el prompt como texto (`LLAMAR_HERRAMIENTA:
+nombre(arg="valor")`) en vez de usar el *function calling* nativo del proveedor.
+Así el mismo escenario evalúa igual en Groq, Anthropic u Ollama, que exponen
+APIs de herramientas incompatibles entre sí. Lo que se mide es si el asistente
+decide bien **cuándo** invocar y con **qué** argumentos, no si sabe rellenar el
+JSON de un SDK concreto.
+
+El check más interesante de esa familia es el de argumentos inventados: un
+argumento marcado como `no_inventable` cuyo valor el usuario nunca dijo es
+alucinación disfrazada de llamada a función, y validar solo la forma del JSON no
+la vería.
 
 **Umbrales en configuración.** El veredicto sale de los umbrales declarados en
 el YAML de cada escenario, no del criterio del juez. Los criterios de aceptación

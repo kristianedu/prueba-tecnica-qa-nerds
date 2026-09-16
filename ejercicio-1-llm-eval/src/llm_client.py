@@ -175,6 +175,25 @@ class ClienteLLM:
             ) from exc
         return datos, respuesta
 
+    def listar_modelos(self) -> list[str]:
+        """
+        Modelos disponibles según el propio proveedor.
+
+        Los catálogos cambian con frecuencia y un ID inventado falla en mitad de
+        una corrida, después de haber gastado llamadas. Mejor preguntarle al
+        proveedor que confiar en la memoria.
+        """
+        if self.proveedor == "mock":
+            return ["(el proveedor mock no usa modelos)"]
+        if self.proveedor == "anthropic":
+            import anthropic
+            return sorted(m.id for m in anthropic.Anthropic().models.list())
+        if self.proveedor == "groq":
+            from groq import Groq
+            return sorted(m.id for m in Groq().models.list().data)
+        from openai import OpenAI
+        return sorted(m.id for m in OpenAI().models.list())
+
     # ------------------------------------------------------------- interno
 
     def _despachar(
@@ -210,8 +229,16 @@ class ClienteLLM:
             except Exception as exc:                      # noqa: BLE001
                 ultimo_error = exc
                 if intento == self.reintentos - 1:
+                    pista = ""
+                    if any(p in str(exc).lower() for p in
+                           ("model", "not found", "does not exist", "decommission")):
+                        pista = (
+                            f"\n\nSi el modelo ya no existe, consulta los disponibles con:"
+                            f"\n  python src/runner.py --listar-modelos --proveedor {self.proveedor}"
+                        )
                     raise ErrorLLM(
-                        f"{self.proveedor}/{modelo} falló tras {self.reintentos} intentos: {exc}"
+                        f"{self.proveedor}/{modelo} falló tras {self.reintentos} "
+                        f"intentos: {exc}{pista}"
                     ) from exc
                 time.sleep(2 ** intento)                  # 1s, 2s, 4s
         else:                                            # pragma: no cover

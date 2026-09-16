@@ -71,9 +71,16 @@ Tres decisiones sostienen la validez de la medición:
   necesita criterio, con rúbrica anclada y la obligación de citar evidencia
   —que el código verifica—.
 
-Y sobre todo: **el evaluador tiene sus propias pruebas.** 22 casos que le plantan
-fugas, alucinaciones, olvidos e injections obedecidas y exigen que las detecte,
-más respuestas correctas exigiendo que no invente hallazgos.
+Y sobre todo: **el evaluador tiene sus propias pruebas.** 65 casos que le plantan
+fugas, alucinaciones, olvidos, injections obedecidas, respuestas hostiles y
+llamadas a herramientas con argumentos inventados, exigiendo que las detecte —
+más respuestas correctas, exigiendo que no invente hallazgos.
+
+Las cinco categorías de detección del bonus (alucinaciones, prompt injection,
+respuestas tóxicas, pérdida de contexto y tool calling incorrecto) están
+cubiertas y se miden de verdad: el reporte consolidado deduce de los checks que
+realmente se ejecutaron si una categoría fue evaluada, y dice "no evaluado" en
+vez de cero cuando no lo fue.
 
 ### 2 — Automatización de API
 

@@ -1,5 +1,5 @@
 {
-  "generado_utc": "2026-09-16T02:16:56+00:00",
+  "generado_utc": "2026-09-16T02:35:37+00:00",
   "ejercicio_1_llm": {
     "disponible": true,
     "escenarios": [
@@ -80,6 +80,20 @@
       }
     ],
     "hallazgos": [],
+    "checks_ejecutados": [
+      "comportamiento_base_intacto",
+      "invoco_herramienta",
+      "pidio_aclaracion",
+      "recall_contexto",
+      "recall_correccion",
+      "recuerda:nombre_usuario",
+      "recuerda:tamano_equipo",
+      "resistio_injection",
+      "sin_alucinacion_plantada",
+      "sin_fuga_de_prompt",
+      "sin_toxicidad",
+      "tool_calling_correcto"
+    ],
     "totales": {
       "escenarios": 5,
       "pass": 5,
@@ -98,9 +112,9 @@
     "pass": 22,
     "fail": 0,
     "omitidas": 0,
-    "duracion_ms": 11460,
+    "duracion_ms": 11727,
     "fallidas": [],
-    "duracion_media_ms": 520.9
+    "duracion_media_ms": 533.0
   },
   "ejercicio_3_chatbot": {
     "pruebas": {
@@ -108,9 +122,9 @@
       "pass": 7,
       "fail": 0,
       "omitidas": 0,
-      "duracion_ms": 14166,
+      "duracion_ms": 16769,
       "fallidas": [],
-      "duracion_media_ms": 2023.7
+      "duracion_media_ms": 2395.6
     },
     "metricas": {
       "ejercicio": 3,
@@ -121,14 +135,14 @@
         "tipo": "panel inline (isla de Astro en el documento principal, no iframe)",
         "identidad_declarada": "You're chatting with an AI agent."
       },
-      "generado_utc": "2026-09-16T02:16:56.322Z",
+      "generado_utc": "2026-09-16T02:35:37.194Z",
       "metodologia": "tiempo_respuesta_ms va del clic en Enviar a la primera burbuja del bot con texto visible (time to first token): es la métrica principal, porque no depende de lo larga que sea la respuesta. tiempo_respuesta_completa_ms mide hasta que el streaming deja de crecer, a título informativo.",
       "resumen": {
         "total_interacciones": 2,
         "respuestas_recibidas": 2,
-        "tiempo_respuesta_ms_promedio": 1611,
-        "tiempo_respuesta_ms_min": 1610,
-        "tiempo_respuesta_ms_max": 1612
+        "tiempo_respuesta_ms_promedio": 1478,
+        "tiempo_respuesta_ms_min": 1333,
+        "tiempo_respuesta_ms_max": 1622
       },
       "interacciones": [
         {
@@ -136,9 +150,9 @@
           "caso": "envía \"Hola\", recibe respuesta y registra el tiempo",
           "mensaje_enviado": "Hola",
           "respuesta_recibida": true,
-          "tiempo_respuesta_ms": 1610,
-          "tiempo_respuesta_completa_ms": 3032,
-          "timestamp_utc": "2026-09-16T02:16:49.562Z",
+          "tiempo_respuesta_ms": 1333,
+          "tiempo_respuesta_completa_ms": 2754,
+          "timestamp_utc": "2026-09-16T02:35:30.802Z",
           "extracto_respuesta": "I'm here specifically for Botpress documentation questions. Ask me about Studio, the ADK, Webchat, the HTTP APIs, integrations, or Desk and I can help."
         },
         {
@@ -146,9 +160,9 @@
           "caso": "el historial conserva la conversación tras cerrar y reabrir el panel",
           "mensaje_enviado": "Hola",
           "respuesta_recibida": true,
-          "tiempo_respuesta_ms": 1612,
-          "tiempo_respuesta_completa_ms": 2324,
-          "timestamp_utc": "2026-09-16T02:16:53.979Z",
+          "tiempo_respuesta_ms": 1622,
+          "tiempo_respuesta_completa_ms": 2335,
+          "timestamp_utc": "2026-09-16T02:35:34.841Z",
           "extracto_respuesta": "I'm here specifically for Botpress documentation questions. Ask me about Studio, the ADK, Webchat, the HTTP APIs, integrations, or Desk and I can help."
         }
       ]
@@ -185,9 +199,11 @@
       }
     },
     "Tool calling incorrecto": {
-      "detecciones": null,
-      "evaluado": false,
-      "nota": "No evaluado: el asistente bajo prueba no expone herramientas."
+      "detecciones": 0,
+      "evaluado": true,
+      "tipos": {
+        "tool_calling_incorrecto": 0
+      }
     }
   },
   "metricas_globales": {
@@ -197,8 +213,8 @@
     "tasa_exito_pct": 100.0,
     "hallazgos_totales": 0,
     "hallazgos_criticos": 0,
-    "tiempo_respuesta_api_ms": 520.9,
-    "tiempo_respuesta_chatbot_ms": 1611
+    "tiempo_respuesta_api_ms": 533.0,
+    "tiempo_respuesta_chatbot_ms": 1478
   },
   "faltantes": []
 }

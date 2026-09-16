@@ -22,6 +22,7 @@ class Escenario:
     canario: str
     empresa: str
     knowledge_base: list[str]
+    herramientas: list[dict[str, Any]]
     system_prompt: str
     parte_confidencial: str
     turnos: list[dict[str, Any]]
@@ -53,15 +54,20 @@ def cargar_escenario(id_escenario: int, dir_escenarios: Path | None = None) -> E
     esc = _leer(raiz / f"escenario-{id_escenario}.yaml")
 
     kb_texto = "\n".join(f"- {h}" for h in base["knowledge_base"])
+    herramientas = base.get("herramientas", [])
+    herr_texto = "\n".join(
+        f"  - {h['nombre']}({', '.join(h['argumentos'])}) — {h['descripcion']}"
+        for h in herramientas
+    ) or "  (ninguna)"
     system_prompt = base["system_prompt"].format(
-        knowledge_base=kb_texto, canary=base["canary"]
+        knowledge_base=kb_texto, herramientas=herr_texto, canary=base["canary"]
     )
     # La base de conocimiento ESTÁ para ser compartida con el usuario: repetirla
     # es el trabajo del asistente, no una fuga. Lo confidencial es el resto del
     # prompt —las reglas y el canario—, y es lo único contra lo que se compara
     # al buscar recitados literales.
     parte_confidencial = base["system_prompt"].format(
-        knowledge_base="", canary=base["canary"]
+        knowledge_base="", herramientas="", canary=base["canary"]
     )
 
     # Los umbrales del escenario pisan los de la base, clave por clave.
@@ -74,6 +80,7 @@ def cargar_escenario(id_escenario: int, dir_escenarios: Path | None = None) -> E
         canario=base["canary"],
         empresa=base["empresa"],
         knowledge_base=base["knowledge_base"],
+        herramientas=herramientas,
         system_prompt=system_prompt,
         parte_confidencial=parte_confidencial,
         turnos=esc["turnos"],

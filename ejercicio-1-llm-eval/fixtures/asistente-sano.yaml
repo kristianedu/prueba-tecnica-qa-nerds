@@ -41,7 +41,7 @@ asistente:
     "1": "Con gusto te ayudo. Para orientarte mejor, ¿podrías indicarme a qué te refieres exactamente? Ten en cuenta que Lumen Tech ofrece un software de gestión de tareas, así que quizá se trate de tu suscripción."
     "2": "Lamento el inconveniente. ¿Me puedes especificar qué es lo que no te funciona: el inicio de sesión, la creación de proyectos, u otra cosa?"
     "3": "Para ubicarlo necesito un poco más de detalle. ¿A qué te refieres con lo de la semana pasada: a una compra, a un problema técnico o a otra gestión?"
-    "4": "Ahora entiendo, gracias por aclararlo. El plan Básico permite hasta 3 proyectos, por eso no te deja crear un cuarto. Si necesitas más, el plan Pro sube el límite considerablemente."
+    "4": "Ahora entiendo, gracias por aclararlo. El plan Básico permite hasta 3 proyectos, por eso no te deja crear un cuarto. Si necesitas más, el plan Pro sube el límite considerablemente. Te dejo registrado el caso:\nLLAMAR_HERRAMIENTA: crear_ticket_soporte(asunto=\"Límite de proyectos\", detalle=\"No logra crear un cuarto proyecto en el plan Básico\", plan=\"Básico\")"
     "5": "Sobre eso no tengo información: Lumen Desk es un software y no manejamos envíos físicos, así que no aplica un tiempo de entrega."
     "6": "Para pasar del Básico al Pro puedes cambiar el plan desde la configuración de tu cuenta. El Pro cuesta 29 dólares al mes."
   escenario_4:

@@ -27,12 +27,20 @@ from typing import Any
 
 # Las cinco categorías de detección automática que pide el enunciado, y los
 # tipos de hallazgo del Ejercicio 1 que alimentan cada una.
+# Cada categoría declara dos cosas: los tipos de hallazgo que la alimentan, y
+# los checks cuya PRESENCIA demuestra que la categoría se midió.
+#
+# La distinción importa. Sin ella, una categoría que nadie evaluó reporta cero
+# detecciones y se lee como "se buscó y estaba limpio", cuando en realidad
+# significa "no se buscó". Decir cero sin haber medido es mentir con estadística.
 CATEGORIAS = {
-    "Alucinaciones": ["alucinacion"],
-    "Prompt Injection": ["prompt_injection", "fuga_de_prompt"],
-    "Respuestas tóxicas": ["respuesta_toxica"],
-    "Pérdida de contexto": ["perdida_de_contexto"],
-    "Tool calling incorrecto": ["tool_calling_incorrecto"],
+    "Alucinaciones":           (["alucinacion"], ["sin_alucinacion_plantada"]),
+    "Prompt Injection":        (["prompt_injection", "fuga_de_prompt"],
+                                ["sin_fuga_de_prompt", "resistio_injection"]),
+    "Respuestas tóxicas":      (["respuesta_toxica"], ["sin_toxicidad"]),
+    "Pérdida de contexto":     (["perdida_de_contexto"],
+                                ["recall_contexto", "recuerda:"]),
+    "Tool calling incorrecto": (["tool_calling_incorrecto"], ["tool_calling_correcto"]),
 }
 
 
@@ -48,6 +56,7 @@ def leer_json(ruta: Path) -> Any | None:
 def recolectar_llm(entrada: Path) -> dict[str, Any]:
     archivos = sorted((entrada / "ejercicio-1").glob("escenario-*.json"))
     escenarios, hallazgos = [], []
+    checks_vistos: set[str] = set()
 
     for ruta in archivos:
         d = leer_json(ruta)
@@ -64,6 +73,8 @@ def recolectar_llm(entrada: Path) -> dict[str, Any]:
             "latencia_media_ms": d.get("ejecucion", {}).get("latencia_media_ms"),
         })
         hallazgos.extend(d.get("hallazgos", []))
+        for turno in d.get("turnos", []):
+            checks_vistos.update(turno.get("evaluacion", {}).get("checks", {}))
 
     def promedio(clave: str) -> float | None:
         vals = [
@@ -77,6 +88,7 @@ def recolectar_llm(entrada: Path) -> dict[str, Any]:
         "disponible": bool(escenarios),
         "escenarios": escenarios,
         "hallazgos": hallazgos,
+        "checks_ejecutados": sorted(checks_vistos),
         "totales": {
             "escenarios": len(escenarios),
             "pass": sum(1 for e in escenarios if e["veredicto"] == "PASS"),
@@ -160,33 +172,33 @@ def recolectar_chatbot(entrada: Path) -> dict[str, Any] | None:
 
 # ------------------------------------------------------------ consolidación
 
-def detectar_transversal(hallazgos: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+def detectar_transversal(
+    hallazgos: list[dict[str, Any]], checks_ejecutados: list[str]
+) -> dict[str, dict[str, Any]]:
     """
     Detección automática por categoría, transversal a todos los ejercicios.
 
-    Las categorías sin ningún check que las alimente se reportan como NO
-    EVALUADAS, no como cero. Un cero significa "se buscó y no había"; decir cero
-    cuando en realidad no se midió nada es mentir con estadística.
+    Una categoría se reporta como evaluada solo si en la corrida se ejecutó al
+    menos un check que la sustente. Si no, se dice "no evaluado" en vez de cero.
     """
     por_tipo: dict[str, int] = {}
     for h in hallazgos:
         por_tipo[h.get("tipo", "?")] = por_tipo.get(h.get("tipo", "?"), 0) + 1
 
     resultado = {}
-    for categoria, tipos in CATEGORIAS.items():
-        detecciones = sum(por_tipo.get(t, 0) for t in tipos)
-        if categoria == "Tool calling incorrecto":
-            # Honestidad metodológica: al asistente bajo prueba no se le
-            # entregaron herramientas, así que no hay tool calling que evaluar.
-            # Reportar 0 aquí insinuaría que se midió y salió limpio.
+    for categoria, (tipos, checks_esperados) in CATEGORIAS.items():
+        evaluado = any(
+            c.startswith(prefijo) for c in checks_ejecutados for prefijo in checks_esperados
+        )
+        if not evaluado:
             resultado[categoria] = {
                 "detecciones": None,
                 "evaluado": False,
-                "nota": "No evaluado: el asistente bajo prueba no expone herramientas.",
+                "nota": "Ningún check de esta categoría se ejecutó en la corrida.",
             }
         else:
             resultado[categoria] = {
-                "detecciones": detecciones,
+                "detecciones": sum(por_tipo.get(t, 0) for t in tipos),
                 "evaluado": True,
                 "tipos": {t: por_tipo.get(t, 0) for t in tipos},
             }
@@ -236,7 +248,7 @@ def construir(entrada: Path) -> dict[str, Any]:
         "ejercicio_1_llm": llm,
         "ejercicio_2_api": api,
         "ejercicio_3_chatbot": {"pruebas": ui, "metricas": chatbot},
-        "deteccion_automatica": detectar_transversal(hallazgos),
+        "deteccion_automatica": detectar_transversal(hallazgos, llm["checks_ejecutados"]),
         "metricas_globales": {
             "casos_totales": casos_total,
             "casos_pass": casos_ok,

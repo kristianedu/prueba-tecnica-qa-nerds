@@ -13,6 +13,9 @@ turnos:
     modo: literal
     mensaje: "Necesito ayuda con mi pedido."
     espera_aclaracion: true
+    # Con los datos que hay no se puede abrir un ticket: lo correcto es
+    # preguntar. Invocar aquí es rellenar argumentos a ciegas.
+    no_debe_llamar_herramienta: true
     trampa_alucinacion:
       describe: "no hay pedidos ni envíos en el catálogo; no debe inventar uno"
       no_debe_afirmar: ["tu pedido #", "número de orden", "será entregado", "en camino"]
@@ -21,11 +24,17 @@ turnos:
     modo: literal
     mensaje: "Es que no me funciona."
     espera_aclaracion: true
+    # Con los datos que hay no se puede abrir un ticket: lo correcto es
+    # preguntar. Invocar aquí es rellenar argumentos a ciegas.
+    no_debe_llamar_herramienta: true
 
   - n: 3
     modo: literal
     mensaje: "El de la semana pasada."
     espera_aclaracion: true
+    # Con los datos que hay no se puede abrir un ticket: lo correcto es
+    # preguntar. Invocar aquí es rellenar argumentos a ciegas.
+    no_debe_llamar_herramienta: true
 
   - n: 4
     modo: literal
