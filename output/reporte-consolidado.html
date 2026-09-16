@@ -17,25 +17,23 @@
  .meta{opacity:.6;font-size:.85rem}
 </style>
 <h1>Reporte consolidado — Prueba Técnica QA</h1>
-<p class="meta">Generado 2026-09-16T01:44:00+00:00</p>
-<div class="cards"><div class="t"><span class="n">27</span><span class="e">Casos ejecutados</span></div><div class="t"><span class="n">27</span><span class="e">En verde</span></div><div class="t"><span class="n">0</span><span class="e">En rojo</span></div><div class="t"><span class="n">100.0%</span><span class="e">Tasa de éxito</span></div><div class="t"><span class="n">0</span><span class="e">Hallazgos</span></div></div>
+<p class="meta">Generado 2026-09-16T01:58:41+00:00</p>
+<div class="cards"><div class="t"><span class="n">34</span><span class="e">Casos ejecutados</span></div><div class="t"><span class="n">34</span><span class="e">En verde</span></div><div class="t"><span class="n">0</span><span class="e">En rojo</span></div><div class="t"><span class="n">100.0%</span><span class="e">Tasa de éxito</span></div><div class="t"><span class="n">0</span><span class="e">Hallazgos</span></div></div>
 <pre># Reporte consolidado — Prueba Técnica QA
 
-Generado: `2026-09-16T01:44:00+00:00`
+Generado: `2026-09-16T01:58:41+00:00`
 
 ## Resumen global
 
 | Métrica | Valor |
 |---|---|
-| Casos ejecutados | 27 |
-| Casos en verde | 27 |
+| Casos ejecutados | 34 |
+| Casos en verde | 34 |
 | Casos en rojo | 0 |
 | Tasa de éxito | 100.0% |
 | Hallazgos detectados | 0 (0 críticos) |
 | Tiempo medio por caso de API | 500.5 ms |
-| Tiempo de respuesta del chatbot | n/d |
-
-&gt; **Aviso:** no se encontraron resultados de ejercicio-3 (chatbot). El reporte se generó con lo disponible.
+| Tiempo de respuesta del chatbot | 1019 ms |
 
 ## Ejercicio 1 — Evaluación conversacional
 
@@ -57,7 +55,53 @@ Generado: `2026-09-16T01:44:00+00:00`
 
 ## Ejercicio 3 — Chatbot Web
 
-_Sin resultados._
+**7/7 en verde** (0 en rojo, 0 omitidas) — 13.4 s en total, media de 1912.0 ms por caso.
+
+**Métricas del chatbot:**
+
+```json
+{
+  &quot;ejercicio&quot;: 3,
+  &quot;descripcion&quot;: &quot;Tiempos de respuesta del asistente de chat de la documentación de Botpress&quot;,
+  &quot;sitio&quot;: &quot;https://botpress.com/docs&quot;,
+  &quot;widget&quot;: {
+    &quot;nombre&quot;: &quot;Ask Docs&quot;,
+    &quot;tipo&quot;: &quot;panel inline (isla de Astro en el documento principal, no iframe)&quot;,
+    &quot;identidad_declarada&quot;: &quot;You&#x27;re chatting with an AI agent.&quot;
+  },
+  &quot;generado_utc&quot;: &quot;2026-09-16T01:56:54.248Z&quot;,
+  &quot;metodologia&quot;: &quot;tiempo_respuesta_ms va del clic en Enviar a la primera burbuja del bot con texto visible (time to first token): es la métrica principal, porque no depende de lo larga que sea la respuesta. tiempo_respuesta_completa_ms mide hasta que el streaming deja de crecer, a título informativo.&quot;,
+  &quot;resumen&quot;: {
+    &quot;total_interacciones&quot;: 2,
+    &quot;respuestas_recibidas&quot;: 2,
+    &quot;tiempo_respuesta_ms_promedio&quot;: 1019,
+    &quot;tiempo_respuesta_ms_min&quot;: 919,
+    &quot;tiempo_respuesta_ms_max&quot;: 1118
+  },
+  &quot;interacciones&quot;: [
+    {
+      &quot;id&quot;: 1,
+      &quot;caso&quot;: &quot;envía \&quot;Hola\&quot;, recibe respuesta y registra el tiempo&quot;,
+      &quot;mensaje_enviado&quot;: &quot;Hola&quot;,
+      &quot;respuesta_recibida&quot;: true,
+      &quot;tiempo_respuesta_ms&quot;: 1118,
+      &quot;tiempo_respuesta_completa_ms&quot;: 2542,
+      &quot;timestamp_utc&quot;: &quot;2026-09-16T01:56:48.233Z&quot;,
+      &quot;extracto_respuesta&quot;: &quot;I&#x27;m here specifically for Botpress documentation questions. Ask me about Studio, the ADK, Webchat, the HTTP APIs, integrations, or Desk and I can help.&quot;
+    },
+    {
+      &quot;id&quot;: 2,
+      &quot;caso&quot;: &quot;el historial conserva la conversación tras cerrar y reabrir el panel&quot;,
+      &quot;mensaje_enviado&quot;: &quot;Hola&quot;,
+      &quot;respuesta_recibida&quot;: true,
+      &quot;tiempo_respuesta_ms&quot;: 919,
+      &quot;tiempo_respuesta_completa_ms&quot;: 2342,
+      &quot;timestamp_utc&quot;: &quot;2026-09-16T01:56:51.887Z&quot;,
+      &quot;extracto_respuesta&quot;: &quot;I&#x27;m here specifically for Botpress documentation questions. Ask me about Studio, the ADK, Webchat, the HTTP APIs, integrations, or Desk and I can help.&quot;
+    }
+  ]
+}
+```
 
 ## Detección automática (transversal)
 

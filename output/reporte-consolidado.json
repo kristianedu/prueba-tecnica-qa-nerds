@@ -1,5 +1,5 @@
 {
-  "generado_utc": "2026-09-16T01:44:00+00:00",
+  "generado_utc": "2026-09-16T01:58:41+00:00",
   "ejercicio_1_llm": {
     "disponible": true,
     "escenarios": [
@@ -103,8 +103,56 @@
     "duracion_media_ms": 500.5
   },
   "ejercicio_3_chatbot": {
-    "pruebas": null,
-    "metricas": null
+    "pruebas": {
+      "total": 7,
+      "pass": 7,
+      "fail": 0,
+      "omitidas": 0,
+      "duracion_ms": 13384,
+      "fallidas": [],
+      "duracion_media_ms": 1912.0
+    },
+    "metricas": {
+      "ejercicio": 3,
+      "descripcion": "Tiempos de respuesta del asistente de chat de la documentación de Botpress",
+      "sitio": "https://botpress.com/docs",
+      "widget": {
+        "nombre": "Ask Docs",
+        "tipo": "panel inline (isla de Astro en el documento principal, no iframe)",
+        "identidad_declarada": "You're chatting with an AI agent."
+      },
+      "generado_utc": "2026-09-16T01:56:54.248Z",
+      "metodologia": "tiempo_respuesta_ms va del clic en Enviar a la primera burbuja del bot con texto visible (time to first token): es la métrica principal, porque no depende de lo larga que sea la respuesta. tiempo_respuesta_completa_ms mide hasta que el streaming deja de crecer, a título informativo.",
+      "resumen": {
+        "total_interacciones": 2,
+        "respuestas_recibidas": 2,
+        "tiempo_respuesta_ms_promedio": 1019,
+        "tiempo_respuesta_ms_min": 919,
+        "tiempo_respuesta_ms_max": 1118
+      },
+      "interacciones": [
+        {
+          "id": 1,
+          "caso": "envía \"Hola\", recibe respuesta y registra el tiempo",
+          "mensaje_enviado": "Hola",
+          "respuesta_recibida": true,
+          "tiempo_respuesta_ms": 1118,
+          "tiempo_respuesta_completa_ms": 2542,
+          "timestamp_utc": "2026-09-16T01:56:48.233Z",
+          "extracto_respuesta": "I'm here specifically for Botpress documentation questions. Ask me about Studio, the ADK, Webchat, the HTTP APIs, integrations, or Desk and I can help."
+        },
+        {
+          "id": 2,
+          "caso": "el historial conserva la conversación tras cerrar y reabrir el panel",
+          "mensaje_enviado": "Hola",
+          "respuesta_recibida": true,
+          "tiempo_respuesta_ms": 919,
+          "tiempo_respuesta_completa_ms": 2342,
+          "timestamp_utc": "2026-09-16T01:56:51.887Z",
+          "extracto_respuesta": "I'm here specifically for Botpress documentation questions. Ask me about Studio, the ADK, Webchat, the HTTP APIs, integrations, or Desk and I can help."
+        }
+      ]
+    }
   },
   "deteccion_automatica": {
     "Alucinaciones": {
@@ -143,16 +191,14 @@
     }
   },
   "metricas_globales": {
-    "casos_totales": 27,
-    "casos_pass": 27,
+    "casos_totales": 34,
+    "casos_pass": 34,
     "casos_fail": 0,
     "tasa_exito_pct": 100.0,
     "hallazgos_totales": 0,
     "hallazgos_criticos": 0,
     "tiempo_respuesta_api_ms": 500.5,
-    "tiempo_respuesta_chatbot_ms": null
+    "tiempo_respuesta_chatbot_ms": 1019
   },
-  "faltantes": [
-    "ejercicio-3 (chatbot)"
-  ]
+  "faltantes": []
 }

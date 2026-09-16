@@ -68,11 +68,17 @@ test.describe('Ejercicio 3 — Conversación con el bot', () => {
     );
   });
 
-  test('el historial conserva la conversación tras cerrar y reabrir el panel', async ({ page }) => {
+  test('el historial conserva la conversación tras cerrar y reabrir el panel', async ({ page }, testInfo) => {
     const chat = new WidgetChat(page);
     await chat.ir();
 
     const resultado = await chat.enviarYCronometrar(MENSAJE);
+    // Segunda muestra de latencia: con una sola medición el min/max/promedio del
+    // informe no diría nada sobre la variabilidad del servicio.
+    registrarMetrica(resultado, {
+      caso: testInfo.title,
+      sitio: test.info().project.use.baseURL ?? 'https://botpress.com/docs',
+    });
     expect(resultado.respuestaRecibida, 'se necesita una respuesta para validar la persistencia').toBe(true);
 
     await chat.cerrar();

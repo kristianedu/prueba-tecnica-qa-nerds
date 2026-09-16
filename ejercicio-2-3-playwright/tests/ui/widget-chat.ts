@@ -90,9 +90,13 @@ export class WidgetChat {
    * En viewport de escritorio (>= lg de Tailwind) el panel viene abierto por
    * defecto, así que no hay que pulsar nada. La condición de "listo" es que el
    * compositor acepte escritura, no un tiempo fijo.
+   *
+   * Se navega a '' y no a '/': el baseURL incluye la ruta (.../docs) y un '/'
+   * la descartaría, aterrizando en la portada comercial de botpress.com, que no
+   * monta este widget.
    */
   async ir(): Promise<void> {
-    await this.page.goto('/', { waitUntil: 'domcontentloaded' });
+    await this.page.goto('', { waitUntil: 'domcontentloaded' });
     await expect(this.campoMensaje).toBeVisible({ timeout: 45_000 });
   }
 
@@ -132,25 +136,68 @@ export class WidgetChat {
 
     let respuestaRecibida = true;
     let extracto = '';
+    let tiempoRespuestaCompletaMs: number | null = null;
+    let tiempoPrimerToken = 0;
+
     try {
       const primera = this.respuestasBot.first();
       // Dos condiciones: que exista la burbuja y que traiga contenido real.
       // Con el streaming, el `<p>` puede montarse vacío por unos milisegundos.
       await expect(primera).toHaveText(/\S{5,}/, { timeout: TIMEOUT_RESPUESTA_BOT_MS });
-      extracto = ((await primera.textContent()) ?? '').trim();
+      tiempoPrimerToken = Date.now() - inicio;
+
+      // El texto capturado justo en el primer token estaría cortado a media
+      // palabra. Dejamos que el streaming termine antes de guardar el extracto,
+      // sin tocar la latencia ya medida.
+      await this.esperarFinDeStreaming(primera);
+      tiempoRespuestaCompletaMs = Date.now() - inicio;
+      extracto = ((await this.respuestasBot.allTextContents()).join(' ')).trim();
     } catch {
       respuestaRecibida = false;
+      tiempoPrimerToken = Date.now() - inicio;
     }
-    const tiempoRespuestaMs = Date.now() - inicio;
 
-    return { mensaje, respuestaRecibida, tiempoRespuestaMs, timestampUtc, extracto };
+    return {
+      mensaje,
+      respuestaRecibida,
+      tiempoRespuestaMs: tiempoPrimerToken,
+      tiempoRespuestaCompletaMs,
+      timestampUtc,
+      extracto,
+    };
+  }
+
+  /**
+   * Espera a que la respuesta deje de crecer.
+   *
+   * No hay indicador fiable de "terminó de escribir" en el DOM, así que la
+   * condición es el propio contenido: dos lecturas consecutivas idénticas
+   * separadas por el intervalo de sondeo significan que el stream se detuvo.
+   * Es una espera por condición, no un `waitForTimeout` fijo.
+   */
+  private async esperarFinDeStreaming(burbuja: Locator): Promise<void> {
+    let anterior: string | null = null;
+    await expect
+      .poll(
+        async () => {
+          const actual = (await burbuja.textContent()) ?? '';
+          const estable = actual.length > 0 && actual === anterior;
+          anterior = actual;
+          return estable;
+        },
+        { timeout: 30_000, intervals: [700] },
+      )
+      .toBe(true);
   }
 }
 
 export interface ResultadoInteraccion {
   mensaje: string;
   respuestaRecibida: boolean;
+  /** Latencia hasta el primer texto visible del bot (time to first token). */
   tiempoRespuestaMs: number;
+  /** Latencia hasta que el streaming se detiene. `null` si no hubo respuesta. */
+  tiempoRespuestaCompletaMs: number | null;
   timestampUtc: string;
   extracto: string;
 }
@@ -201,9 +248,10 @@ export function registrarMetrica(
     },
     generado_utc: new Date().toISOString(),
     metodologia:
-      'El cronómetro va del clic en Enviar a la primera burbuja del bot con texto ' +
-      'visible (time to first token). La respuesta llega en streaming, por lo que ' +
-      'medir hasta el último token reflejaría la longitud del texto, no la latencia.',
+      'tiempo_respuesta_ms va del clic en Enviar a la primera burbuja del bot con ' +
+      'texto visible (time to first token): es la métrica principal, porque no ' +
+      'depende de lo larga que sea la respuesta. tiempo_respuesta_completa_ms mide ' +
+      'hasta que el streaming deja de crecer, a título informativo.',
     resumen: {
       total_interacciones: interaccionesDeLaCorrida.length,
       respuestas_recibidas: conRespuesta.length,
@@ -217,6 +265,7 @@ export function registrarMetrica(
       mensaje_enviado: i.mensaje,
       respuesta_recibida: i.respuestaRecibida,
       tiempo_respuesta_ms: i.tiempoRespuestaMs,
+      tiempo_respuesta_completa_ms: i.tiempoRespuestaCompletaMs,
       timestamp_utc: i.timestampUtc,
       extracto_respuesta: i.extracto.slice(0, 300),
     })),

@@ -85,9 +85,24 @@ corrida y absorción del arranque en frío de Render. Detalle en
 
 ### 3 — Automatización de Chatbot Web
 
-Pruebas de interfaz sobre el widget de chat de Botpress Docs, que vive en un
-iframe cross-origin. Detalle en
+7 pruebas sobre el widget de chat de Botpress Docs, **7/7 en verde**, estables en
+5 corridas consecutivas. Tiempo de respuesta medido del bot: **~1.0 s** al primer
+token. Detalle en
 [`ejercicio-2-3-playwright/tests/ui/README.md`](ejercicio-2-3-playwright/tests/ui/README.md).
+
+> **Hallazgo: el enunciado parte de una premisa que ya no se cumple.**
+>
+> El enunciado asume que el widget vive en un **iframe cross-origin**, y
+> recomienda Playwright sobre Cypress justamente por esa razón. Verificado contra
+> el sitio real, hoy **no hay ningún `<iframe>`**: el asistente "Ask Docs" se
+> renderiza inline en el documento principal como isla de Astro.
+>
+> Por eso las pruebas **no** usan `frameLocator()` — sería una indirección que no
+> corresponde al DOM real. El Page Object aísla ese detalle, así que si Botpress
+> vuelve al iframe basta cambiar una asignación y ningún spec se entera.
+>
+> La recomendación de Playwright sigue siendo correcta por otros motivos, pero el
+> argumento del iframe ya no aplica.
 
 ### 4 — CI/CD
 

@@ -193,6 +193,26 @@ def detectar_transversal(hallazgos: list[dict[str, Any]]) -> dict[str, dict[str,
     return resultado
 
 
+def _tiempo_chatbot(chatbot: Any) -> float | None:
+    """
+    Extrae el tiempo de respuesta del chatbot.
+
+    Se aceptan dos formas —el promedio dentro de `resumen`, o un valor suelto en
+    la raíz— porque el consolidador no debe acoplarse a la estructura exacta que
+    produzca el Ejercicio 3. Si mañana cambia el esquema, el reporte degrada a
+    "n/d" en vez de reventar.
+    """
+    if not isinstance(chatbot, dict):
+        return None
+    resumen = chatbot.get("resumen")
+    if isinstance(resumen, dict):
+        for clave in ("tiempo_respuesta_ms_promedio", "tiempo_respuesta_ms"):
+            if isinstance(resumen.get(clave), (int, float)):
+                return resumen[clave]
+    return chatbot.get("tiempo_respuesta_ms") if isinstance(
+        chatbot.get("tiempo_respuesta_ms"), (int, float)) else None
+
+
 def construir(entrada: Path) -> dict[str, Any]:
     llm = recolectar_llm(entrada)
     pw = recolectar_playwright(entrada)
@@ -225,9 +245,7 @@ def construir(entrada: Path) -> dict[str, Any]:
             "hallazgos_totales": len(hallazgos),
             "hallazgos_criticos": sum(1 for h in hallazgos if h.get("severidad") == "critica"),
             "tiempo_respuesta_api_ms": api["duracion_media_ms"] if api else None,
-            "tiempo_respuesta_chatbot_ms": (
-                chatbot.get("tiempo_respuesta_ms") if isinstance(chatbot, dict) else None
-            ),
+            "tiempo_respuesta_chatbot_ms": _tiempo_chatbot(chatbot),
         },
         "faltantes": [
             nombre for nombre, presente in [
