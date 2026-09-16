@@ -20,7 +20,7 @@ publica un reporte consolidado.
 |---|---|
 | **Ejercicio 3 — Chatbot Web** | `npm ci`, instala Chromium y corre las pruebas de interfaz |
 | **Ejercicio 2 — API** | `npm ci`, despierta la API y corre las pruebas de API |
-| **Ejercicio 1 — Evaluación LLM** | Instala dependencias, corre las 74 pruebas del evaluador y después evalúa contra el modelo real |
+| **Ejercicio 1 — Evaluación LLM** | Instala dependencias, corre las 90 pruebas del evaluador y después evalúa contra el modelo real |
 | **Ejercicio 5 — Consolidado** | Recupera los artefactos de los tres, genera el reporte y decide el resultado |
 
 El orden Web → API → LLM es el que pide el enunciado. Técnicamente convendría el

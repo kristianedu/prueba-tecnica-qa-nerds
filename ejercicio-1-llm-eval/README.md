@@ -19,7 +19,7 @@ python3.12 -m venv .venv
 .venv/bin/python -m pytest tests/ -v
 ```
 
-**74 pruebas** que le plantan al motor fugas de prompt, alucinaciones, olvidos,
+**90 pruebas** que le plantan al motor fugas de prompt, alucinaciones, olvidos,
 injections obedecidas, respuestas hostiles y llamadas a herramientas con
 argumentos inventados, exigiendo que las detecte — y respuestas correctas,
 exigiendo que **no** invente hallazgos. Es la respuesta a "¿cómo sé que tu
