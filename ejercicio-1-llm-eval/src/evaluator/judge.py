@@ -152,7 +152,6 @@ class DictamenTurno:
     afirmaciones: list[Afirmacion] = field(default_factory=list)
     hallazgos: list[Hallazgo] = field(default_factory=list)
     citas_descartadas: int = 0
-    es_stub: bool = False
 
     def a_dict(self) -> dict[str, Any]:
         return {
@@ -160,7 +159,6 @@ class DictamenTurno:
             "justificacion": self.justificacion,
             "afirmaciones_factuales": [a.a_dict() for a in self.afirmaciones],
             "citas_descartadas": self.citas_descartadas,
-            "juez_simulado": self.es_stub,
         }
 
 
@@ -192,20 +190,13 @@ class Juez:
             f"Respuesta del asistente a evaluar (turno {turno}):\n{respuesta}"
         )
 
-        datos, meta = self.cliente.completar_json(
+        datos, _ = self.cliente.completar_json(
             system,
             [Mensaje("user", peticion)],
             ESQUEMA_DICTAMEN,
             modelo=self.modelo,
             contexto={"rol": "juez", "turno": turno},
         )
-
-        if meta.es_stub:
-            return DictamenTurno(
-                turno=turno, coherencia=0,
-                justificacion="Juez no ejecutado: proveedor 'mock'.",
-                es_stub=True,
-            )
 
         # Se aplica la regla de las citas. En código, no por confianza.
         afirmaciones, hallazgos, descartadas = [], [], 0

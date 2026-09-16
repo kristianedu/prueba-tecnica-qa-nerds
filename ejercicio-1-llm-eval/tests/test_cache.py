@@ -1,82 +1,84 @@
 """
-Regresión de la caché.
+Pruebas de la caché en disco.
 
-La caché en disco es lo que hace reproducible a toda la suite, así que una clave
-mal construida no produce un error visible: produce respuestas *equivocadas* que
-pasan como buenas. Este archivo fija la propiedad que debe cumplir.
+La caché es lo que hace reproducible a la suite y lo que evita volver a pagar
+las 71 llamadas en cada corrida. Una clave mal construida no produce un error
+visible: produce respuestas *equivocadas* que pasan como buenas, porque una
+petición distinta recupera la entrada de otra.
 
-El bug que originó estas pruebas: la ruta del fixture no formaba parte de la
-clave. En el pipeline, el paso del fixture sano llenaba la caché y la
-contraprueba con el fixture defectuoso reutilizaba esas respuestas, así que los
-5 escenarios "pasaban" cuando debían fallar los 5. Lo detectó la contraprueba de
-CI, no las pruebas locales, porque en local se corría con --sin-cache.
+De ahí que la propiedad que se fija aquí sea la más importante del módulo: todo
+lo que determina la respuesta tiene que formar parte de la clave.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pytest
 
-from llm_client import CacheEnDisco, ClienteLLM, Mensaje
+from llm_client import CacheEnDisco
 
-FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
-
-
-def _cliente(fixture: str, directorio_cache: Path) -> ClienteLLM:
-    return ClienteLLM(
-        proveedor="mock",
-        fixture_mock=str(FIXTURES / fixture),
-        directorio_cache=directorio_cache,
-    )
-
-
-def test_fixtures_distintos_no_comparten_entrada_de_cache(tmp_path):
-    """
-    Dos fixtures distintos, misma petición: no pueden devolver lo mismo.
-
-    Es la regresión del bug: si el fixture no entra en la clave, el segundo
-    cliente lee lo que cacheó el primero.
-    """
-    contexto = {"rol": "asistente", "escenario": 2, "turno": 5}
-    mensajes = [Mensaje("user", "¿Tienen app para iPhone?")]
-
-    sano = _cliente("asistente-sano.yaml", tmp_path)
-    r_sano = sano.completar("system", mensajes, contexto=contexto)
-
-    defectuoso = _cliente("asistente-defectuoso.yaml", tmp_path)
-    r_defectuoso = defectuoso.completar("system", mensajes, contexto=contexto)
-
-    assert r_sano.texto != r_defectuoso.texto
-    assert "no tenemos" in r_sano.texto.lower()
-    assert "app store" in r_defectuoso.texto.lower()
-
-
-def test_el_mismo_fixture_si_reutiliza_la_cache(tmp_path):
-    """La contraparte: con todo igual, la caché debe funcionar de verdad."""
-    contexto = {"rol": "asistente", "escenario": 1, "turno": 2}
-    mensajes = [Mensaje("user", "¿Cuánto cuesta el Pro?")]
-
-    primero = _cliente("asistente-sano.yaml", tmp_path)
-    r1 = primero.completar("system", mensajes, contexto=contexto)
-    assert r1.desde_cache is False
-
-    segundo = _cliente("asistente-sano.yaml", tmp_path)
-    r2 = segundo.completar("system", mensajes, contexto=contexto)
-    assert r2.desde_cache is True
-    assert r2.texto == r1.texto
+BASE = {
+    "proveedor": "groq",
+    "modelo": "openai/gpt-oss-20b",
+    "system": "Eres el asistente de soporte de Lumen Tech.",
+    "mensajes": [{"role": "user", "content": "¿Cuánto cuesta el plan Pro?"}],
+    "max_tokens": 700,
+    "esquema": None,
+}
 
 
 @pytest.mark.parametrize("cambio", [
-    {"modelo": "otro-modelo"},
-    {"system": "otro system prompt"},
-    {"max_tokens": 999},
-])
+    {"proveedor": "anthropic"},
+    {"modelo": "openai/gpt-oss-120b"},
+    {"system": "Eres otro asistente distinto."},
+    {"mensajes": [{"role": "user", "content": "¿Y el plan Básico?"}]},
+    {"max_tokens": 1024},
+    {"esquema": {"type": "object"}},
+], ids=["proveedor", "modelo", "system", "mensajes", "max_tokens", "esquema"])
 def test_cualquier_cambio_en_la_peticion_cambia_la_clave(cambio):
-    """Todo lo que determina la respuesta tiene que entrar en la clave."""
-    base = {
-        "proveedor": "mock", "modelo": "m", "system": "s",
-        "mensajes": [{"role": "user", "content": "hola"}],
-        "max_tokens": 100, "esquema": None, "contexto": None, "fixture": None,
-    }
-    assert CacheEnDisco.clave(**base) != CacheEnDisco.clave(**{**base, **cambio})
+    assert CacheEnDisco.clave(**BASE) != CacheEnDisco.clave(**{**BASE, **cambio})
+
+
+def test_la_misma_peticion_da_la_misma_clave():
+    assert CacheEnDisco.clave(**BASE) == CacheEnDisco.clave(**BASE)
+
+
+def test_el_orden_de_los_campos_no_altera_la_clave():
+    """
+    La clave se calcula sobre JSON canónico. Si dependiera del orden en que se
+    pasan los campos, la caché fallaría de forma intermitente según el camino
+    del código que la invoque.
+    """
+    invertido = dict(reversed(list(BASE.items())))
+    assert CacheEnDisco.clave(**BASE) == CacheEnDisco.clave(**invertido)
+
+
+def test_guarda_y_recupera(tmp_path):
+    cache = CacheEnDisco(tmp_path)
+    clave = CacheEnDisco.clave(**BASE)
+
+    assert cache.leer(clave) is None
+    cache.escribir(clave, {"texto": "El plan Pro cuesta 29 dólares al mes."})
+    assert cache.leer(clave)["texto"] == "El plan Pro cuesta 29 dólares al mes."
+
+
+def test_una_entrada_corrupta_se_trata_como_ausente(tmp_path):
+    """
+    Un archivo truncado —por ejemplo si se interrumpe una corrida a mitad de
+    escritura— no puede tumbar la siguiente. Se trata como si no existiera y se
+    vuelve a pedir al modelo.
+    """
+    cache = CacheEnDisco(tmp_path)
+    clave = CacheEnDisco.clave(**BASE)
+    (tmp_path / f"{clave}.json").write_text("{ esto no es JSON", encoding="utf-8")
+
+    assert cache.leer(clave) is None
+
+
+def test_desactivada_no_escribe_ni_lee(tmp_path):
+    """`--sin-cache` tiene que forzar llamadas nuevas de verdad."""
+    cache = CacheEnDisco(tmp_path, activa=False)
+    clave = CacheEnDisco.clave(**BASE)
+
+    cache.escribir(clave, {"texto": "algo"})
+    assert cache.leer(clave) is None
+    assert list(tmp_path.glob("*.json")) == []

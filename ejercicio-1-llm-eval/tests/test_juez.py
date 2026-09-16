@@ -2,9 +2,9 @@
 Pruebas de la capa 2: el juez.
 
 Esta ruta —construir la petición, parsear el JSON del modelo y aplicar la regla
-de las citas— no se ejercitaba nunca en modo mock, así que era el único código
-del proyecto que solo se habría estrenado durante la corrida real, gastando
-llamadas y sin red de seguridad.
+de las citas— solo se ejercita contra un modelo real, que cuesta llamadas y no
+es determinista. Sin estas pruebas, cualquier regresión en ella se descubriría a
+mitad de una corrida, después de haber gastado las llamadas.
 
 Se prueba con un doble del cliente que devuelve dictámenes controlados. Queda
 fuera únicamente la llamada HTTP en sí, que es responsabilidad del SDK.
@@ -28,9 +28,8 @@ RESPUESTA = (
 class ClienteDoble:
     """Devuelve un dictamen fijo. Registra lo que se le pidió, para poder afirmarlo."""
 
-    def __init__(self, dictamen: dict | str, *, es_stub: bool = False):
+    def __init__(self, dictamen: dict | str):
         self.dictamen = dictamen
-        self.es_stub = es_stub
         self.ultima_peticion: tuple | None = None
         self.proveedor = "doble"
         self.modelo = "modelo-doble"
@@ -39,11 +38,8 @@ class ClienteDoble:
                        max_tokens=2048, contexto=None):
         self.ultima_peticion = (system, mensajes, esquema, contexto)
         meta = RespuestaLLM(
-            texto="", modelo=modelo or "doble", proveedor="doble",
-            latencia_ms=0.0, es_stub=self.es_stub,
+            texto="", modelo=modelo or "doble", proveedor="doble", latencia_ms=0.0,
         )
-        if self.es_stub:
-            return {}, meta
         crudo = self.dictamen if isinstance(self.dictamen, str) else json.dumps(self.dictamen)
         try:
             return json.loads(_recortar_json(crudo)), meta
@@ -207,18 +203,3 @@ def test_campos_ausentes_no_revientan():
     assert d.coherencia == 70
     assert d.afirmaciones == []
     assert d.hallazgos == []
-
-
-# --------------------------------------------------------------- modo stub
-
-def test_en_modo_stub_se_marca_y_no_inventa_nota():
-    """
-    Con el proveedor mock el juez no se ejecuta. Tiene que decirlo, no devolver
-    un número inventado que se confunda con una medición real.
-    """
-    d = _juzgar(ClienteDoble({}, es_stub=True))
-
-    assert d.es_stub is True
-    assert d.coherencia == 0
-    assert "mock" in d.justificacion
-    assert d.a_dict()["juez_simulado"] is True

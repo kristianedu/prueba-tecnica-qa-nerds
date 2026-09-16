@@ -30,10 +30,8 @@ npm install && npx playwright install chromium
 ```bash
 # Ejercicio 1 — evaluación conversacional
 cd ejercicio-1-llm-eval
-.venv/bin/python -m pytest tests/ -v                       # pruebas del evaluador
-.venv/bin/python src/runner.py --todos --proveedor mock \
-    --fixture fixtures/asistente-sano.yaml                 # sin credenciales
-.venv/bin/python src/runner.py --todos --proveedor anthropic   # corrida real
+.venv/bin/python -m pytest tests/ -v                     # 74 pruebas del evaluador
+.venv/bin/python src/runner.py --todos --proveedor groq  # evaluación real
 
 # Ejercicios 2 y 3
 cd ejercicio-2-3-playwright
@@ -46,7 +44,9 @@ ejercicio-1-llm-eval/.venv/bin/python ejercicio-5-reporte/consolidar.py \
     --entrada output --salida output
 ```
 
-Todo salvo la corrida real del Ejercicio 1 funciona **sin credenciales**.
+Las pruebas del evaluador y los Ejercicios 2 y 3 corren **sin credenciales**.
+El Ejercicio 1 evalúa contra un LLM real, así que necesita una clave de Groq
+(tier gratuito): https://console.groq.com
 
 ---
 
@@ -123,9 +123,9 @@ Dos decisiones que vale la pena señalar:
   de pruebas **no** llevan es `continue-on-error`: lo tuvieron, y con esa
   bandera un job en rojo no tumbaba la ejecución, así que el pipeline se
   reportaba en verde con el Ejercicio 1 fallando.
-- **El job del LLM corre primero las pruebas del evaluador**, y después una
-  contraprueba: con el fixture defectuoso los 5 escenarios *tienen* que fallar.
-  Si pasan, el evaluador dejó de detectar y el pipeline se entera.
+- **El job del LLM corre primero las 74 pruebas del evaluador**, sin gastar una
+  sola llamada. Si el motor está roto, se corta ahí: no tiene sentido pagar 71
+  llamadas al modelo para que las evalúe un evaluador que no funciona.
 
 El orden de los jobs es Web → API → LLM porque así lo pide el enunciado.
 Técnicamente convendría el inverso —la API es la más rápida y barata, y fallar
@@ -155,28 +155,27 @@ en adelante **eliminó el parámetro `temperature`** y devuelve HTTP 400 si se
 envía. En esos modelos la reproducibilidad no puede venir del muestreo, así que
 viene de la caché.
 
-**Todo corre sin credenciales.** El Ejercicio 1 trae un proveedor `mock` con
-conversaciones pregrabadas, en dos variantes: un asistente sano (que debe dar
-5/5 PASS) y uno defectuoso (que debe dar 5/5 FAIL). Eso permite que el pipeline
-corra en cualquier fork sin secrets, y es además la demostración de que el motor
-discrimina: detecta las fallas **sin inventarlas**.
+**El evaluador se prueba a sí mismo sin gastar llamadas.** Las 74 pruebas plantan
+fallas —fugas, alucinaciones, olvidos, injections obedecidas, hostilidad,
+argumentos de herramienta inventados— y exigen que las detecte, además de exigir
+que **no** invente hallazgos ante respuestas correctas. Corren sin credenciales y
+sin red, y van antes de la evaluación en el pipeline: si el motor está roto, no
+tiene sentido gastar 71 llamadas al modelo.
 
 **Artefactos separados por proyecto.** Los dos projects de Playwright escriben
 `playwright-report-{api,ui}/` y `playwright-{api,ui}.json`. En CI corren en jobs
 distintos y sus artefactos se fusionan en un mismo directorio: con nombres
 compartidos, uno sobrescribiría al otro.
 
-**El pipeline valida el arnés; la corrida real evalúa al modelo.** CI corre en
-modo mock, sin credenciales, y se mantiene en verde: lo que verifica es que el
-motor de evaluación sigue funcionando y sigue detectando las fallas plantadas.
-Los resultados de la evaluación real contra Groq están en `output/` y contienen
-dos FAIL legítimos, porque el modelo evaluado inventó capacidades que no existen
-en su base de conocimiento. Mezclar ambas cosas haría que un defecto del modelo
-bajo prueba pareciera un fallo de la suite.
+**El pipeline evalúa contra el LLM real en cada push**, así que necesita el
+secret `GROQ_API_KEY`. Los dos FAIL del Ejercicio 1 son defectos del modelo
+evaluado, no de la suite: inventó capacidades que no existen en su base de
+conocimiento.
 
-**Honestidad en el reporte.** Una corrida en modo mock se marca a sí misma con
-`coherence_score: null` y `evaluacion_parcial: true`. Nadie debería poder
-confundirla con una evaluación real.
+**Honestidad en el reporte.** El consolidado deduce de los checks realmente
+ejecutados si una categoría fue evaluada, y dice "no evaluado" en vez de cero
+cuando no lo fue. Un cero significa "se buscó y no había"; decirlo sin haber
+medido es mentir con estadística.
 
 ## Variables de entorno
 

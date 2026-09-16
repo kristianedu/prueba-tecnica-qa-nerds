@@ -4,7 +4,7 @@ Cliente de LLM del motor de evaluación.
 Tres responsabilidades:
 
 1. Esconder al proveedor detrás de una sola interfaz. El resto del código nunca
-   sabe si está hablando con Anthropic, Groq, OpenAI o con el mock.
+   sabe con cuál de los proveedores está hablando.
 
 2. Cachear cada respuesta en disco. Esto es lo que hace que la segunda corrida
    sea idéntica a la primera y salga gratis. La reproducibilidad de toda la
@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-PROVEEDORES = ("anthropic", "groq", "openai", "mock")
+PROVEEDORES = ("groq", "anthropic", "openai")
 
 # Claude 4.6 en adelante eliminó los parámetros de muestreo: mandarle
 # `temperature` a esos modelos devuelve un HTTP 400. Haiku 4.5 y anteriores sí
@@ -64,7 +64,6 @@ class RespuestaLLM:
     tokens_entrada: int = 0
     tokens_salida: int = 0
     desde_cache: bool = False
-    es_stub: bool = False   # True cuando la produjo el mock, no un modelo real
 
     def resumen(self) -> dict[str, Any]:
         return {
@@ -74,7 +73,6 @@ class RespuestaLLM:
             "tokens_entrada": self.tokens_entrada,
             "tokens_salida": self.tokens_salida,
             "desde_cache": self.desde_cache,
-            "es_stub": self.es_stub,
         }
 
 
@@ -122,20 +120,17 @@ class ClienteLLM:
         cache: bool = True,
         directorio_cache: str | Path = ".llm-cache",
         reintentos: int = 3,
-        fixture_mock: str | Path | None = None,
     ):
-        self.proveedor = (proveedor or os.getenv("LLM_PROVIDER", "mock")).lower()
+        self.proveedor = (proveedor or os.getenv("LLM_PROVIDER", "groq")).lower()
         if self.proveedor not in PROVEEDORES:
             raise ErrorLLM(
                 f"Proveedor desconocido: {self.proveedor!r}. "
                 f"Opciones: {', '.join(PROVEEDORES)}"
             )
-        self.modelo = modelo or os.getenv("LLM_MODEL", "claude-haiku-4-5")
+        self.modelo = modelo or os.getenv("LLM_MODEL", "openai/gpt-oss-20b")
         self.reintentos = reintentos
         self.cache = CacheEnDisco(directorio_cache, activa=cache)
         self._sdk: Any = None
-        self._fixture_mock = fixture_mock
-        self._mock_cargado: dict[str, Any] | None = None
 
     # ------------------------------------------------------------------ API
 
@@ -183,8 +178,6 @@ class ClienteLLM:
         una corrida, después de haber gastado llamadas. Mejor preguntarle al
         proveedor que confiar en la memoria.
         """
-        if self.proveedor == "mock":
-            return ["(el proveedor mock no usa modelos)"]
         if self.proveedor == "anthropic":
             import anthropic
             return sorted(m.id for m in anthropic.Anthropic().models.list())
@@ -212,8 +205,6 @@ class ClienteLLM:
             mensajes=[m.como_api() for m in mensajes],
             max_tokens=max_tokens,
             esquema=esquema,
-            contexto=contexto if self.proveedor == "mock" else None,
-            fixture=str(self._ruta_fixture()) if self.proveedor == "mock" else None,
         )
         if (guardado := self.cache.leer(clave)) is not None:
             return RespuestaLLM(**{**guardado, "desde_cache": True})
@@ -222,8 +213,8 @@ class ClienteLLM:
         ultimo_error: Exception | None = None
         for intento in range(self.reintentos):
             try:
-                texto, t_in, t_out, es_stub = self._llamar(
-                    system, mensajes, modelo, max_tokens, contexto, esquema
+                texto, t_in, t_out = self._llamar(
+                    system, mensajes, modelo, max_tokens, esquema
                 )
                 break
             except Exception as exc:                      # noqa: BLE001
@@ -251,7 +242,6 @@ class ClienteLLM:
             latencia_ms=(time.perf_counter() - inicio) * 1000,
             tokens_entrada=t_in,
             tokens_salida=t_out,
-            es_stub=es_stub,
         )
         payload = respuesta.__dict__.copy()
         payload.pop("desde_cache", None)
@@ -264,11 +254,8 @@ class ClienteLLM:
         mensajes: list[Mensaje],
         modelo: str,
         max_tokens: int,
-        contexto: dict[str, Any],
         esquema: dict[str, Any] | None,
-    ) -> tuple[str, int, int, bool]:
-        if self.proveedor == "mock":
-            return self._llamar_mock(contexto, esquema)
+    ) -> tuple[str, int, int]:
         if self.proveedor == "anthropic":
             return self._llamar_anthropic(system, mensajes, modelo, max_tokens, esquema)
         return self._llamar_compatible_openai(system, mensajes, modelo, max_tokens, esquema)
@@ -291,7 +278,7 @@ class ClienteLLM:
 
         r = self._sdk.messages.create(**kwargs)
         texto = next((b.text for b in r.content if b.type == "text"), "")
-        return texto, r.usage.input_tokens, r.usage.output_tokens, False
+        return texto, r.usage.input_tokens, r.usage.output_tokens
 
     def _llamar_compatible_openai(self, system, mensajes, modelo, max_tokens, esquema):
         """Groq y OpenAI comparten la forma de chat completions."""
@@ -322,58 +309,7 @@ class ClienteLLM:
             r.choices[0].message.content or "",
             getattr(uso, "prompt_tokens", 0),
             getattr(uso, "completion_tokens", 0),
-            False,
         )
-
-    def _llamar_mock(self, contexto, esquema):
-        """
-        Respuestas pregrabadas. Sirve para dos cosas distintas:
-
-          - correr el pipeline completo sin credenciales (demo y CI), y
-          - alimentar al evaluador con respuestas MALAS a propósito, para
-            comprobar que efectivamente las detecta.
-
-        El juez no se puede simular de verdad, así que en modo mock devuelve un
-        stub neutro marcado con es_stub=True. Las métricas lo propagan para que
-        nadie confunda una corrida mock con una evaluación real.
-        """
-        rol = contexto.get("rol", "asistente")
-
-        if rol == "juez" or esquema is not None:
-            stub = {
-                "coherencia": 0,
-                "hallazgos": [],
-                "afirmaciones_factuales": [],
-                "nota": "Juez no ejecutado: el proveedor es 'mock'.",
-            }
-            return json.dumps(stub, ensure_ascii=False), 0, 0, True
-
-        fixture = self._cargar_fixture()
-        clave = f"escenario_{contexto.get('escenario')}"
-        turno = str(contexto.get("turno"))
-        try:
-            return fixture[rol][clave][turno], 0, 0, True
-        except KeyError as exc:
-            raise ErrorLLM(
-                f"El fixture mock no tiene entrada para rol={rol} "
-                f"{clave} turno={turno}"
-            ) from exc
-
-    def _ruta_fixture(self) -> Path:
-        return Path(
-            self._fixture_mock
-            or os.getenv("MOCK_FIXTURE")
-            or Path(__file__).resolve().parents[1] / "fixtures" / "asistente-sano.yaml"
-        ).resolve()
-
-    def _cargar_fixture(self) -> dict[str, Any]:
-        if self._mock_cargado is not None:
-            return self._mock_cargado
-        ruta = self._ruta_fixture()
-        if not ruta.exists():
-            raise ErrorLLM(f"No existe el fixture mock: {ruta}")
-        self._mock_cargado = _cargar_fixture_con_herencia(ruta)
-        return self._mock_cargado
 
 
 def _recortar_json(texto: str) -> str:
@@ -385,34 +321,3 @@ def _recortar_json(texto: str) -> str:
             limpio = limpio[4:]
     inicio, fin = limpio.find("{"), limpio.rfind("}")
     return limpio[inicio:fin + 1] if inicio != -1 and fin != -1 else limpio
-
-
-def _cargar_fixture_con_herencia(ruta: Path) -> dict[str, Any]:
-    """
-    Carga un fixture resolviendo `extiende:`.
-
-    Permite que el fixture defectuoso declare SOLO los turnos que rompe y herede
-    el resto del sano. Así el archivo se lee como lo que es —una lista de fallas
-    plantadas— en vez de como 41 respuestas entre las que hay que buscar cuál
-    está mal.
-    """
-    import yaml
-
-    datos = yaml.safe_load(ruta.read_text(encoding="utf-8")) or {}
-    padre_ref = datos.pop("extiende", None)
-    if not padre_ref:
-        return datos
-
-    padre = _cargar_fixture_con_herencia((ruta.parent / padre_ref).resolve())
-    return _fusionar(padre, datos)
-
-
-def _fusionar(base: dict[str, Any], encima: dict[str, Any]) -> dict[str, Any]:
-    """Fusión profunda: los valores de `encima` pisan los de `base`."""
-    salida = dict(base)
-    for clave, valor in encima.items():
-        if isinstance(valor, dict) and isinstance(salida.get(clave), dict):
-            salida[clave] = _fusionar(salida[clave], valor)
-        else:
-            salida[clave] = valor
-    return salida

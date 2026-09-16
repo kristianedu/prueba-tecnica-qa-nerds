@@ -69,7 +69,6 @@ def recolectar_llm(entrada: Path) -> dict[str, Any]:
             "metricas": d.get("metricas", {}),
             "analisis": d.get("analisis", ""),
             "completada": d.get("ejecucion", {}).get("conversacion_completada"),
-            "parcial": d.get("ejecucion", {}).get("evaluacion_parcial", False),
             "latencia_media_ms": d.get("ejecucion", {}).get("latencia_media_ms"),
         })
         hallazgos.extend(d.get("hallazgos", []))
@@ -101,7 +100,6 @@ def recolectar_llm(entrada: Path) -> dict[str, Any]:
             "tasa_conversaciones_completadas": (
                 round(completadas / len(escenarios) * 100) if escenarios else None
             ),
-            "evaluacion_parcial": any(e["parcial"] for e in escenarios),
         },
     }
 
@@ -335,13 +333,6 @@ def render_markdown(r: dict[str, Any]) -> str:
             f"conversaciones completadas {_o(t['tasa_conversaciones_completadas'], '%')}.",
             "",
         ]
-        if t["evaluacion_parcial"]:
-            L += [
-                "> ⚠️ Evaluación **parcial**: el juez LLM no se ejecutó (proveedor `mock`), "
-                "así que `coherence_score` no se midió. Los checks determinísticos "
-                "—contexto, alucinación y seguridad— sí son válidos.",
-                "",
-            ]
 
     # ------ Ejercicios 2 y 3
     for titulo, bloque in [

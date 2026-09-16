@@ -3,6 +3,9 @@
 # Corre los ejercicios 1, 2 y 3 en cada push y cada pull request, y publica un
 # reporte consolidado.
 #
+# El Ejercicio 1 evalúa contra un LLM real, así que necesita el secret
+# GROQ_API_KEY configurado en el repositorio.
+#
 # Sobre el orden de los jobs: el enunciado pide Web -> API -> Chatbot/LLM y eso
 # es lo que se respeta. Técnicamente convendría el inverso (la API es la más
 # rápida y barata, así que fallar ahí primero ahorra minutos de runner), pero en
@@ -152,67 +155,37 @@ jobs:
         run: rm -rf ../output && mkdir -p ../output
 
       - name: Pruebas del propio evaluador
-        # Corren sin credenciales y sin red. Si el evaluador está roto, no tiene
-        # sentido gastar llamadas al modelo: se corta aquí.
+        # Corren sin credenciales y sin red, y son la garantía de que el motor
+        # sigue detectando: plantan fugas de prompt, alucinaciones, olvidos,
+        # injections obedecidas, respuestas hostiles y llamadas a herramientas
+        # con argumentos inventados, y exigen que las cace —además de exigir que
+        # NO invente hallazgos ante respuestas correctas—.
+        #
+        # Van antes de la evaluación a propósito: si el evaluador está roto, no
+        # tiene sentido gastar 71 llamadas al modelo.
         run: python -m pytest tests/ -v
 
-      - name: Elegir proveedor según haya credenciales
-        id: proveedor
-        # Sin ningún secret configurado se corre en modo mock. Es a propósito:
-        # cualquiera puede clonar o bifurcar el repositorio y ver el pipeline
-        # completo en verde sin tener que conseguir credenciales.
+      - name: Verificar que hay credenciales
+        # Sin clave no hay nada que evaluar. Se corta aquí con un mensaje claro
+        # en vez de dejar que el SDK falle más adelante con un error de red que
+        # no dice qué configurar.
         env:
-          GROQ: ${{ secrets.GROQ_API_KEY }}
-          ANTHROPIC: ${{ secrets.ANTHROPIC_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
-          if [ -n "$GROQ" ]; then
-            echo "valor=groq" >> "$GITHUB_OUTPUT"
-            echo "Corriendo contra Groq."
-          elif [ -n "$ANTHROPIC" ]; then
-            echo "valor=anthropic" >> "$GITHUB_OUTPUT"
-            echo "Corriendo contra Anthropic."
-          else
-            echo "valor=mock" >> "$GITHUB_OUTPUT"
-            echo "Sin credenciales: se corre en modo mock con fixtures."
+          if [ -z "$GROQ_API_KEY" ]; then
+            echo "::error::Falta el secret GROQ_API_KEY. Configúralo en Settings > Secrets and variables > Actions."
+            exit 1
           fi
 
       - name: Evaluación conversacional
+        # 71 llamadas al modelo por corrida. La caché en disco no se reutiliza
+        # entre ejecuciones de CI, así que cada push evalúa de verdad.
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          LLM_MODEL: ${{ vars.LLM_MODEL || 'llama-3.3-70b-versatile' }}
-          JUDGE_MODEL: ${{ vars.JUDGE_MODEL || 'llama-3.3-70b-versatile' }}
-        run: |
-          python src/runner.py --todos \
-            --proveedor "${{ steps.proveedor.outputs.valor }}" \
-            --fixture fixtures/asistente-sano.yaml
-
-      - name: Verificar que el evaluador detecta fallas plantadas
-        # Contraprueba: con el fixture defectuoso los 5 escenarios TIENEN que
-        # fallar. Si pasan, el evaluador dejó de detectar y el pipeline debe
-        # enterarse.
-        #
-        # Escribe en un directorio desechable, NO en output/. Si no, sus 5 FAIL
-        # sobrescriben los resultados buenos del paso anterior y el reporte
-        # consolidado acaba informando de fallos que la corrida real nunca tuvo.
-        run: |
-          set +e
-          python src/runner.py --todos --proveedor mock \
-            --fixture fixtures/asistente-defectuoso.yaml \
-            --salida "$RUNNER_TEMP/contraprueba"
-          CODIGO=$?
-          set -e
-
-          # Se exige el código 1 EXACTO, no "cualquier cosa distinta de cero".
-          # El runner devuelve 1 cuando detecta escenarios en FAIL, pero un
-          # crash también sale distinto de cero: aceptarlo haría que un
-          # evaluador roto pasara por uno que funciona, que es justo lo que esta
-          # contraprueba existe para impedir.
-          case "$CODIGO" in
-            1) echo "El evaluador detectó correctamente las fallas plantadas." ;;
-            0) echo "::error::El evaluador NO detectó las fallas plantadas."; exit 1 ;;
-            *) echo "::error::La contraprueba terminó con el código $CODIGO: el runner falló en vez de evaluar."; exit 1 ;;
-          esac
+          LLM_PROVIDER: groq
+          LLM_MODEL: ${{ vars.LLM_MODEL || 'openai/gpt-oss-20b' }}
+          JUDGE_MODEL: ${{ vars.JUDGE_MODEL || 'openai/gpt-oss-120b' }}
+        run: python src/runner.py --todos --proveedor groq
 
       - name: Guardar resultados
         if: always()

@@ -7,8 +7,8 @@ estructura que pide el enunciado, más los campos que hacen la corrida auditable
 
 Uso:
     python src/runner.py --escenario 4
-    python src/runner.py --todos --proveedor anthropic
-    python src/runner.py --todos --proveedor mock --fixture fixtures/asistente-defectuoso.yaml
+    python src/runner.py --todos --proveedor groq
+    python src/runner.py --listar-modelos --proveedor groq
 """
 
 from __future__ import annotations
@@ -108,7 +108,6 @@ def correr_escenario(esc: Escenario, cliente: ClienteLLM, juez: Juez,
             "modelo_juez": juez.modelo or cliente.modelo,
             "umbrales": esc.umbrales,
             "conversacion_completada": m.conversacion_completada,
-            "evaluacion_parcial": m.evaluacion_parcial,
             "latencia_media_ms": round(sum(latencias) / len(latencias), 1) if latencias else 0,
         },
     }
@@ -135,10 +134,9 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Evaluación conversacional de agentes LLM")
     ap.add_argument("--escenario", type=int, help="ID del escenario (1-5)")
     ap.add_argument("--todos", action="store_true", help="correr los 5 escenarios")
-    ap.add_argument("--proveedor", help="anthropic | groq | openai | mock")
+    ap.add_argument("--proveedor", help="groq | anthropic | openai")
     ap.add_argument("--modelo", help="modelo del asistente")
     ap.add_argument("--modelo-juez", help="modelo del juez")
-    ap.add_argument("--fixture", help="fixture del mock")
     ap.add_argument("--sin-cache", action="store_true")
     ap.add_argument("--listar-modelos", action="store_true",
                     help="consulta al proveedor qué modelos ofrece y termina")
@@ -158,7 +156,7 @@ def main() -> int:
 
     cliente = ClienteLLM(
         proveedor=args.proveedor, modelo=args.modelo,
-        cache=not args.sin_cache, fixture_mock=args.fixture,
+        cache=not args.sin_cache,
     )
     juez = Juez(cliente, modelo=args.modelo_juez or os.getenv("JUDGE_MODEL") or cliente.modelo)
     usuario = UsuarioSimulado(cliente)

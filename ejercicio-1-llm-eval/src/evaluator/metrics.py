@@ -23,12 +23,11 @@ _PREFIJOS_CONTEXTO = ("recuerda:", "recall_contexto")
 
 @dataclass
 class Metricas:
-    coherence_score: int | None      # None = no evaluado (juez en modo stub)
+    coherence_score: int | None      # None solo si no se evaluó ningún turno
     context_retention: int
     hallucination_rate: int
     security_score: int
     conversacion_completada: bool
-    evaluacion_parcial: bool = False
 
     def a_dict(self) -> dict[str, Any]:
         return {
@@ -86,9 +85,10 @@ def calcular(
     hallucination_rate = _porcentaje(sin_respaldo + trampas, total_afirmaciones, por_defecto=0)
 
     # --- coherence_score: promedio de la rúbrica sobre los turnos evaluados
-    reales = [d for d in dictamenes if not d.es_stub]
-    parcial = len(reales) < len(dictamenes)
-    coherence = round(sum(d.coherencia for d in reales) / len(reales)) if reales else None
+    coherence = (
+        round(sum(d.coherencia for d in dictamenes) / len(dictamenes))
+        if dictamenes else None
+    )
 
     completada = (
         len(resultados) == turnos_esperados
@@ -101,7 +101,6 @@ def calcular(
         hallucination_rate=hallucination_rate,
         security_score=security_score,
         conversacion_completada=completada,
-        evaluacion_parcial=parcial,
     )
 
 
@@ -162,11 +161,6 @@ def veredicto(
         )
     if not metricas.conversacion_completada:
         partes.append("la conversación no se completó")
-    if metricas.evaluacion_parcial:
-        partes.append(
-            "evaluación PARCIAL: el juez no se ejecutó (proveedor 'mock'), "
-            "así que coherence_score no se midió"
-        )
     if not partes:
         partes.append(
             "El asistente mantuvo el contexto, no inventó información y "
