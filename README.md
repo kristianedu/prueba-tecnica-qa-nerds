@@ -6,8 +6,10 @@ CI/CD que los ejecuta en cada cambio y un reporte consolidado.
 ```
 ejercicio-1-llm-eval/        Evaluación conversacional de agentes LLM   (Python)
 ejercicio-2-3-playwright/    API y Chatbot web                          (TypeScript)
+ejercicio-4-cicd/            CI/CD — apunta al workflow, que por exigencia
+                             de GitHub Actions vive en .github/workflows/
 ejercicio-5-reporte/         Consolidación y métricas globales          (Python)
-.github/workflows/qa.yml     Pipeline de CI/CD
+.github/workflows/qa.yml     Pipeline de CI/CD (Ejercicio 4)
 output/                      Resultados generados
 ```
 
@@ -113,7 +115,8 @@ token. Detalle en
 
 ### 4 — CI/CD
 
-[`.github/workflows/qa.yml`](.github/workflows/qa.yml) — corre los tres
+Detalle en [`ejercicio-4-cicd/README.md`](ejercicio-4-cicd/README.md).
+El workflow es [`.github/workflows/qa.yml`](.github/workflows/qa.yml) — corre los tres
 ejercicios en cada push y pull request.
 
 Dos decisiones que vale la pena señalar:
