@@ -10,8 +10,21 @@ const SALIDA = path.resolve(__dirname, '..', 'output');
 // Sufijo por proyecto. Los jobs de CI corren en runners distintos y sus
 // artefactos se fusionan en un mismo directorio: si ambos escribieran con el
 // mismo nombre, uno sobrescribiría al otro y el consolidado perdería medio
-// ejercicio. Lo fijan los scripts de npm.
-const TAG = process.env.PW_TAG ?? 'resultados';
+// ejercicio.
+//
+// Se deduce del propio comando en vez de depender solo de PW_TAG. Antes, un
+// `npx playwright test --project=ui` a secas escribía en un nombre genérico que
+// el consolidador igualmente recogía, duplicando los casos: un comando
+// perfectamente razonable corrompía el reporte.
+function sufijo(): string {
+  if (process.env.PW_TAG) return process.env.PW_TAG;
+  const proyectos = process.argv
+    .map((a, i) => (a === '--project' ? process.argv[i + 1] : a.match(/^--project=(.+)$/)?.[1]))
+    .filter((v): v is string => Boolean(v));
+  return proyectos.length === 1 ? proyectos[0] : 'todos';
+}
+
+const TAG = sufijo();
 
 export default defineConfig({
   testDir: './tests',

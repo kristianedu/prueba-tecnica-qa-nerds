@@ -130,14 +130,34 @@ def recolectar_playwright(entrada: Path) -> dict[str, dict[str, Any]]:
     Cada project escribe el suyo (`playwright-api.json`, `playwright-ui.json`)
     precisamente para que al juntar los artefactos de jobs distintos ninguno
     sobrescriba al otro.
+
+    Se deduplica por (proyecto, archivo, título) quedándose con el resultado más
+    reciente. Los artefactos pueden solaparse —`npm test` corre ambos projects y
+    escribe un archivo propio, además de los que ya hubiera por proyecto— y sin
+    esto un mismo caso se contaría dos veces, inflando los totales del reporte.
     """
     pruebas: list[dict[str, Any]] = []
-    for ruta in sorted(entrada.glob("playwright*.json")):
+    vistas: set[tuple[str, str, str]] = set()
+
+    # De más reciente a más antiguo: ante un caso repetido gana la última corrida.
+    archivos = sorted(
+        entrada.glob("playwright*.json"),
+        key=lambda r: r.stat().st_mtime,
+        reverse=True,
+    )
+    for ruta in archivos:
         datos = leer_json(ruta)
         if not datos:
             continue
+        del_archivo: list[dict[str, Any]] = []
         for suite in datos.get("suites", []):
-            _aplanar_specs(suite, pruebas)
+            _aplanar_specs(suite, del_archivo)
+        for prueba in del_archivo:
+            identidad = (prueba["proyecto"], prueba["archivo"], prueba["titulo"])
+            if identidad in vistas:
+                continue
+            vistas.add(identidad)
+            pruebas.append(prueba)
     if not pruebas:
         return {}
 
