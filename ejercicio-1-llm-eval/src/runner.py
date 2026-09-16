@@ -17,6 +17,7 @@ import argparse
 import json
 import os
 import sys
+import textwrap
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -35,8 +36,64 @@ RAIZ = Path(__file__).resolve().parents[2]
 DIR_SALIDA = RAIZ / "output" / "ejercicio-1"
 
 
+def _envolver(texto: str, sangria: str = " " * 15, ancho: int = 92) -> str:
+    """Texto legible en terminal, respetando los saltos de línea propios."""
+    lineas = []
+    for parrafo in texto.strip().splitlines():
+        lineas.extend(
+            textwrap.wrap(parrafo, width=ancho - len(sangria)) or [""]
+        )
+    return f"\n{sangria}".join(lineas)
+
+
+def _imprimir_turno(n: int, mensaje_usuario: str, respuesta: str,
+                    det, dic, latencia_ms: float) -> None:
+    """
+    Vuelca un turno completo: qué se preguntó, qué se respondió y qué dictaminó
+    cada capa del evaluador.
+
+    Es lo que hace útil trabajar escenario por escenario: sin ver la respuesta
+    no se puede distinguir un defecto del modelo de un falso positivo del
+    evaluador, que es justo la distinción que más cuesta y más importa.
+    """
+    print(f"\n  ┌─ turno {n} " + "─" * 66)
+    print(f"  │ USUARIO    {_envolver(mensaje_usuario)}")
+    print(f"  │ ASISTENTE  {_envolver(respuesta)}")
+
+    # Los checks con prefijo `info:` describen lo que ocurrió, no si estuvo
+    # bien. Se muestran aparte para que un ✗ siempre signifique un fallo.
+    aserciones = {k: v for k, v in det.checks.items() if not k.startswith("info:")}
+    informativos = {k[5:]: v for k, v in det.checks.items() if k.startswith("info:")}
+
+    if aserciones:
+        marcas = "  ".join(
+            f"{'✓' if ok else '✗'} {nombre}" for nombre, ok in sorted(aserciones.items())
+        )
+        print(f"  │ checks     {_envolver(marcas)}")
+    if informativos:
+        datos = "  ".join(
+            f"{nombre}: {'sí' if valor else 'no'}" for nombre, valor in sorted(informativos.items())
+        )
+        print(f"  │ info       {_envolver(datos)}")
+
+    print(f"  │ coherencia {dic.coherencia} — {_envolver(dic.justificacion)}")
+
+    sin_respaldo = [a for a in dic.afirmaciones if not a.respaldada_por_kb]
+    for a in sin_respaldo:
+        print(f"  │ ⚠ fuera de la base de conocimiento: {_envolver(a.afirmacion)}")
+    if dic.citas_descartadas:
+        print(f"  │ {dic.citas_descartadas} hallazgo(s) del juez descartado(s) por citar mal")
+
+    for h in det.hallazgos + dic.hallazgos:
+        print(f"  │ ✗ [{h.severidad}] {h.tipo}: {_envolver(h.descripcion)}")
+    if not (det.hallazgos or dic.hallazgos) and not sin_respaldo:
+        print("  │ ✓ sin hallazgos")
+    print(f"  └─ {latencia_ms:.0f} ms")
+
+
 def correr_escenario(esc: Escenario, cliente: ClienteLLM, juez: Juez,
-                     usuario: UsuarioSimulado, verboso: bool = True) -> dict:
+                     usuario: UsuarioSimulado, verboso: bool = True,
+                     detalle: bool = False) -> dict:
     historial: list[Mensaje] = []
     turnos_json, resultados, dictamenes = [], [], []
     latencias = []
@@ -84,7 +141,9 @@ def correr_escenario(esc: Escenario, cliente: ClienteLLM, juez: Juez,
             "latencia_ms": round(r.latencia_ms, 1),
         })
 
-        if verboso:
+        if detalle:
+            _imprimir_turno(n, mensaje_usuario, r.texto, det, dic, r.latencia_ms)
+        elif verboso:
             marca = "✗" if (det.hallazgos or dic.hallazgos) else "✓"
             print(f"    turno {n} {marca}  {len(det.hallazgos) + len(dic.hallazgos)} hallazgo(s)")
 
@@ -138,6 +197,8 @@ def main() -> int:
     ap.add_argument("--modelo", help="modelo del asistente")
     ap.add_argument("--modelo-juez", help="modelo del juez")
     ap.add_argument("--sin-cache", action="store_true")
+    ap.add_argument("--detalle", action="store_true",
+                    help="muestra la conversación completa y la evaluación de cada turno")
     ap.add_argument("--listar-modelos", action="store_true",
                     help="consulta al proveedor qué modelos ofrece y termina")
     ap.add_argument("--salida", type=Path, default=DIR_SALIDA)
@@ -168,7 +229,7 @@ def main() -> int:
     resumen = []
     for esc in escenarios:
         print(f"  Escenario {esc.id}: {esc.nombre}")
-        datos = correr_escenario(esc, cliente, juez, usuario)
+        datos = correr_escenario(esc, cliente, juez, usuario, detalle=args.detalle)
         destino = args.salida / f"escenario-{esc.id}.json"
         destino.write_text(json.dumps(datos, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"    -> {datos['veredicto']}  {datos['metricas']}")

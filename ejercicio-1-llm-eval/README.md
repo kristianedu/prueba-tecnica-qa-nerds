@@ -51,6 +51,44 @@ Son 71 llamadas por corrida (30 del asistente, 30 del juez, 11 del usuario
 simulado — los 19 turnos literales no gastan ninguna) y unos 6 minutos. La caché
 en disco hace que una segunda corrida idéntica salga gratis e instantánea.
 
+### 3. Trabajar escenario por escenario
+
+Para iterar sobre un escenario concreto, sin gastar los otros cuatro:
+
+```bash
+.venv/bin/python src/runner.py --escenario 4 --detalle
+```
+
+`--detalle` vuelca la conversación completa: qué preguntó el usuario simulado,
+qué respondió el asistente, qué checks pasaron, qué nota de coherencia puso el
+juez y por qué, y qué afirmaciones quedaron fuera de la base de conocimiento.
+
+Sin ver la respuesta no se puede distinguir un defecto del modelo de un falso
+positivo del evaluador, y esa es la distinción que más cuesta y más importa.
+Los tres falsos positivos que se corrigieron en este proyecto se encontraron
+exactamente así.
+
+En la salida, **un ✗ siempre significa un fallo**. Lo que solo describe lo que
+ocurrió —como si el asistente invocó una herramienta, que en la mayoría de los
+turnos es correcto que no lo haga— va en la línea `info`, aparte.
+
+**La caché hace barata la iteración.** La primera corrida de un escenario gasta
+sus llamadas; a partir de ahí, mientras no cambien el prompt ni los mensajes,
+las respuestas salen de disco. Eso permite ajustar un check o la rúbrica del
+juez y volver a evaluar en milisegundos, sin pagar de nuevo:
+
+```bash
+# cambia un umbral, un matcher o la rúbrica... y reevalúa gratis
+.venv/bin/python src/runner.py --escenario 4 --detalle
+
+# ¿hace falta una respuesta nueva del modelo? fuerza las llamadas
+.venv/bin/python src/runner.py --escenario 4 --detalle --sin-cache
+```
+
+Ojo con lo segundo: el modelo no es determinista, así que `--sin-cache` puede
+dar un veredicto distinto sobre el mismo escenario. Es una propiedad del sujeto
+bajo prueba, no de la suite.
+
 ## Resultados de la corrida real
 
 Contra **Groq** (asistente `openai/gpt-oss-20b`, juez `openai/gpt-oss-120b`),

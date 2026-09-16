@@ -564,7 +564,11 @@ def evaluar_turno(
             mensajes_usuario=mensajes_usuario or [], permitida=permitida,
         )
         res.checks["tool_calling_correcto"] = not hallazgos_tool
-        res.checks["invoco_herramienta"] = hubo
+        # Prefijo `info:` porque esto NO es una aserción: que no se invoque
+        # ninguna herramienta es lo correcto en la mayoría de los turnos.
+        # Mezclarlo con los checks reales haría que el comportamiento correcto
+        # apareciera marcado como fallo.
+        res.checks["info:invoco_herramienta"] = hubo
         res.hallazgos.extend(hallazgos_tool)
 
     if base := turno_cfg.get("verifica_comportamiento_base"):
