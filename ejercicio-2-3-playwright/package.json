@@ -5,9 +5,10 @@
   "description": "Ejercicios 2 (API) y 3 (Chatbot web) — suite compartida de Playwright",
   "scripts": {
     "test": "playwright test",
-    "test:api": "PW_RESULTS=playwright-api.json playwright test --project=api",
-    "test:ui": "PW_RESULTS=playwright-ui.json playwright test --project=ui",
-    "report": "playwright show-report ../output/playwright-report"
+    "test:api": "PW_TAG=api playwright test --project=api",
+    "test:ui": "PW_TAG=ui playwright test --project=ui",
+    "report:api": "playwright show-report ../output/playwright-report-api",
+    "report:ui": "playwright show-report ../output/playwright-report-ui"
   },
   "devDependencies": {
     "@playwright/test": "^1.50.0",

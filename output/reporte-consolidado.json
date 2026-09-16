@@ -1,5 +1,5 @@
 {
-  "generado_utc": "2026-09-16T01:42:18+00:00",
+  "generado_utc": "2026-09-16T01:44:00+00:00",
   "ejercicio_1_llm": {
     "disponible": true,
     "escenarios": [
@@ -98,9 +98,9 @@
     "pass": 22,
     "fail": 0,
     "omitidas": 0,
-    "duracion_ms": 10985,
+    "duracion_ms": 11011,
     "fallidas": [],
-    "duracion_media_ms": 499.3
+    "duracion_media_ms": 500.5
   },
   "ejercicio_3_chatbot": {
     "pruebas": null,
@@ -149,7 +149,7 @@
     "tasa_exito_pct": 100.0,
     "hallazgos_totales": 0,
     "hallazgos_criticos": 0,
-    "tiempo_respuesta_api_ms": 499.3,
+    "tiempo_respuesta_api_ms": 500.5,
     "tiempo_respuesta_chatbot_ms": null
   },
   "faltantes": [

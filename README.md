@@ -138,6 +138,11 @@ conversaciones pregrabadas, en dos variantes: un asistente sano (que debe dar
 corra en cualquier fork sin secrets, y es además la demostración de que el motor
 discrimina: detecta las fallas **sin inventarlas**.
 
+**Artefactos separados por proyecto.** Los dos projects de Playwright escriben
+`playwright-report-{api,ui}/` y `playwright-{api,ui}.json`. En CI corren en jobs
+distintos y sus artefactos se fusionan en un mismo directorio: con nombres
+compartidos, uno sobrescribiría al otro.
+
 **Honestidad en el reporte.** Una corrida en modo mock se marca a sí misma con
 `coherence_score: null` y `evaluacion_parcial: true`. Nadie debería poder
 confundirla con una evaluación real.

@@ -1,6 +1,6 @@
 # Reporte consolidado — Prueba Técnica QA
 
-Generado: `2026-09-16T01:42:18+00:00`
+Generado: `2026-09-16T01:44:00+00:00`
 
 ## Resumen global
 
@@ -11,7 +11,7 @@ Generado: `2026-09-16T01:42:18+00:00`
 | Casos en rojo | 0 |
 | Tasa de éxito | 100.0% |
 | Hallazgos detectados | 0 (0 críticos) |
-| Tiempo medio por caso de API | 499.3 ms |
+| Tiempo medio por caso de API | 500.5 ms |
 | Tiempo de respuesta del chatbot | n/d |
 
 > **Aviso:** no se encontraron resultados de ejercicio-3 (chatbot). El reporte se generó con lo disponible.
@@ -32,7 +32,7 @@ Generado: `2026-09-16T01:42:18+00:00`
 
 ## Ejercicio 2 — API
 
-**22/22 en verde** (0 en rojo, 0 omitidas) — 11.0 s en total, media de 499.3 ms por caso.
+**22/22 en verde** (0 en rojo, 0 omitidas) — 11.0 s en total, media de 500.5 ms por caso.
 
 ## Ejercicio 3 — Chatbot Web
 

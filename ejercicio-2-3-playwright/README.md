@@ -17,12 +17,19 @@ npx playwright install chromium
 npm run test:api     # Ejercicio 2 — pruebas de API
 npm run test:ui      # Ejercicio 3 — pruebas del chatbot
 npm test             # ambos
-npm run report       # abre el reporte HTML
+npm run report:api   # abre el reporte HTML del Ejercicio 2
+npm run report:ui    # abre el reporte HTML del Ejercicio 3
 ```
 
-Los reportes se escriben en `../output/`: `playwright-report/` (HTML) y
-`playwright-resultados.json`, que es lo que consume el reporte consolidado del
+Cada project escribe sus propios artefactos en `../output/`:
+`playwright-report-{api,ui}/` (HTML, la evidencia de ejecución) y
+`playwright-{api,ui}.json`, que es lo que consume el consolidador del
 Ejercicio 5.
+
+El sufijo por proyecto no es cosmético: en CI los dos projects corren en jobs
+separados y sus artefactos se fusionan en un mismo directorio. Con un nombre
+compartido, uno sobrescribiría al otro y el reporte consolidado perdería medio
+ejercicio.
 
 ---
 

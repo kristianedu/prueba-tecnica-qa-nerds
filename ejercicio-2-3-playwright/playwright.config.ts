@@ -7,6 +7,12 @@ dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 // Salida unificada: el Ejercicio 5 consolida desde aquí.
 const SALIDA = path.resolve(__dirname, '..', 'output');
 
+// Sufijo por proyecto. Los jobs de CI corren en runners distintos y sus
+// artefactos se fusionan en un mismo directorio: si ambos escribieran con el
+// mismo nombre, uno sobrescribiría al otro y el consolidado perdería medio
+// ejercicio. Lo fijan los scripts de npm.
+const TAG = process.env.PW_TAG ?? 'resultados';
+
 export default defineConfig({
   testDir: './tests',
   // La API en Render duerme en el plan gratuito: el primer golpe puede tardar
@@ -19,11 +25,8 @@ export default defineConfig({
   workers: 1,
   reporter: [
     ['list'],
-    ['html', { outputFolder: path.join(SALIDA, 'playwright-report'), open: 'never' }],
-    // Un archivo de resultados por proyecto. Si ambos escribieran el mismo,
-    // al fusionar los artefactos de los jobs en CI uno sobrescribiría al otro
-    // y el reporte consolidado perdería medio ejercicio.
-    ['json', { outputFile: path.join(SALIDA, process.env.PW_RESULTS ?? 'playwright-resultados.json') }],
+    ['html', { outputFolder: path.join(SALIDA, `playwright-report-${TAG}`), open: 'never' }],
+    ['json', { outputFile: path.join(SALIDA, `playwright-${TAG}.json`) }],
   ],
   use: {
     trace: 'retain-on-failure',
