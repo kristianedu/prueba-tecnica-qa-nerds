@@ -209,7 +209,3 @@ ejecutados si una categoría fue evaluada, y dice "no evaluado" en vez de cero
 cuando no lo fue. Un cero significa "se buscó y no había"; decirlo sin haber
 medido es mentir con estadística.
 
-## Variables de entorno
-
-Ver [`.env.example`](.env.example). Solo `ANTHROPIC_API_KEY` (o la del proveedor
-que elijas) es necesaria, y únicamente para la corrida real del Ejercicio 1.
