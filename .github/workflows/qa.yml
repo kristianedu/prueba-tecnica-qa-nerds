@@ -185,7 +185,23 @@ jobs:
           LLM_PROVIDER: groq
           LLM_MODEL: ${{ vars.LLM_MODEL || 'openai/gpt-oss-20b' }}
           JUDGE_MODEL: ${{ vars.JUDGE_MODEL || 'openai/gpt-oss-120b' }}
-        run: python src/runner.py --todos --proveedor groq
+        run: |
+          set +e
+          python src/runner.py --todos --proveedor groq
+          CODIGO=$?
+          set -e
+
+          # El runner devuelve 1 cuando algún escenario termina en FAIL. Eso NO
+          # es un fallo del pipeline: es el modelo bajo prueba mostrando un
+          # defecto, que es exactamente lo que esta evaluación existe para
+          # encontrar, y va al reporte consolidado. Solo un crash (cualquier
+          # otro código) significa que el arnés falló y debe poner el job en
+          # rojo.
+          case "$CODIGO" in
+            0) echo "Evaluación completa: sin defectos en el modelo." ;;
+            1) echo "Evaluación completa: el modelo mostró defectos. Ver el reporte consolidado." ;;
+            *) echo "::error::El runner falló con el código $CODIGO."; exit 1 ;;
+          esac
 
       - name: Guardar resultados
         if: always()
@@ -245,8 +261,9 @@ jobs:
           retention-days: 30
 
       - name: Decidir el resultado del pipeline
-        # Segunda red de seguridad, con el consolidado ya en la mano: si un
-        # job de pruebas falló, la ejecución ya está en rojo por sí sola, pero
-        # esto además captura casos en rojo o hallazgos críticos que hubieran
-        # quedado registrados sin tumbar su job.
+        # El modo estricto pone el pipeline en rojo solo cuando el ARNÉS falló:
+        # pruebas de API o de interfaz en rojo, o resultados de algún ejercicio
+        # ausentes. Los defectos que la evaluación encuentra en el modelo NO lo
+        # tumban: son el resultado del trabajo, y viven en el reporte publicado
+        # en el resumen del job.
         run: python ejercicio-5-reporte/consolidar.py --entrada output --salida output --estricto

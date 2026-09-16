@@ -1,6 +1,6 @@
 # Reporte consolidado — Prueba Técnica QA
 
-Generado: `2026-09-16T03:30:08+00:00`
+Generado: `2026-09-16T03:37:16+00:00`
 
 ## Resumen global
 

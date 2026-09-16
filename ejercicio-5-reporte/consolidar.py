@@ -423,7 +423,7 @@ def main() -> int:
     ap.add_argument("--salida", type=Path, default=Path("output"))
     ap.add_argument(
         "--estricto", action="store_true",
-        help="devuelve código 1 si hay casos en rojo, hallazgos críticos o resultados ausentes",
+        help="código 1 solo si falló el arnés: pruebas de API/UI en rojo o resultados ausentes",
     )
     args = ap.parse_args()
 
@@ -448,18 +448,44 @@ def main() -> int:
     if not args.estricto:
         return 0
 
-    problemas = []
-    if g["casos_fail"]:
-        problemas.append(f"{g['casos_fail']} caso(s) en rojo")
-    if g["hallazgos_criticos"]:
-        problemas.append(f"{g['hallazgos_criticos']} hallazgo(s) crítico(s)")
+    # Dos cosas distintas, con consecuencias distintas:
+    #
+    #   - Fallos del ARNÉS: pruebas de API o de interfaz en rojo, o resultados
+    #     de algún ejercicio que no llegaron. Significan que la suite no hizo
+    #     su trabajo, y ponen el pipeline en rojo.
+    #
+    #   - Hallazgos sobre el MODELO: escenarios en FAIL, alucinaciones, fugas.
+    #     Significan que la suite SÍ hizo su trabajo y encontró defectos en el
+    #     sistema evaluado. Son el resultado, no un error: se informan y el
+    #     pipeline sigue en verde. Confundirlos haría que un modelo defectuoso
+    #     pareciera un pipeline roto.
+    arnes = []
+    pw_fail = sum(
+        b["fail"] for b in (reporte["ejercicio_2_api"], reporte["ejercicio_3_chatbot"]["pruebas"]) if b
+    )
+    if pw_fail:
+        arnes.append(f"{pw_fail} prueba(s) de API/interfaz en rojo")
     if reporte["faltantes"]:
-        problemas.append("faltan resultados de " + ", ".join(reporte["faltantes"]))
+        arnes.append("faltan resultados de " + ", ".join(reporte["faltantes"]))
 
-    if problemas:
-        print("PIPELINE EN ROJO: " + "; ".join(problemas), file=sys.stderr)
+    llm = reporte["ejercicio_1_llm"]["totales"]
+    hallazgos_modelo = []
+    if llm["fail"]:
+        hallazgos_modelo.append(f"{llm['fail']} escenario(s) en FAIL")
+    if g["hallazgos_totales"]:
+        hallazgos_modelo.append(
+            f"{g['hallazgos_totales']} hallazgo(s), {g['hallazgos_criticos']} crítico(s)"
+        )
+
+    if arnes:
+        print("PIPELINE EN ROJO — falló el arnés: " + "; ".join(arnes), file=sys.stderr)
         return 1
-    print("PIPELINE EN VERDE: todos los casos pasaron y no hay hallazgos críticos.")
+    print("PIPELINE EN VERDE — el arnés corrió completo.")
+    if hallazgos_modelo:
+        print("Defectos encontrados en el modelo evaluado: " + "; ".join(hallazgos_modelo)
+              + ". Detalle en el reporte.")
+    else:
+        print("El modelo evaluado no mostró defectos.")
     return 0
 
 

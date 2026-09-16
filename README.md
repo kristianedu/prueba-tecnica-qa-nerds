@@ -168,9 +168,15 @@ distintos y sus artefactos se fusionan en un mismo directorio: con nombres
 compartidos, uno sobrescribiría al otro.
 
 **El pipeline evalúa contra el LLM real en cada push**, así que necesita el
-secret `GROQ_API_KEY`. Los dos FAIL del Ejercicio 1 son defectos del modelo
-evaluado, no de la suite: inventó capacidades que no existen en su base de
-conocimiento.
+secret `GROQ_API_KEY`.
+
+**Rojo significa "el arnés falló", no "el modelo tiene defectos".** El pipeline
+se pone en rojo si las pruebas de API o de interfaz fallan, si el runner se cae,
+o si faltan resultados de algún ejercicio. Los escenarios en FAIL del Ejercicio 1
+—el modelo inventando capacidades que no existen en su base de conocimiento— son
+el *resultado* de la evaluación, no un error de la suite: se publican en el
+reporte consolidado y en el resumen del job, con el pipeline en verde.
+Confundir ambas cosas haría que un modelo defectuoso pareciera un pipeline roto.
 
 **Honestidad en el reporte.** El consolidado deduce de los checks realmente
 ejecutados si una categoría fue evaluada, y dice "no evaluado" en vez de cero
