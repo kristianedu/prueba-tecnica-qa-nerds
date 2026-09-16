@@ -51,7 +51,24 @@ Son 71 llamadas por corrida (30 del asistente, 30 del juez, 11 del usuario
 simulado — los 19 turnos literales no gastan ninguna) y unos 6 minutos. La caché
 en disco hace que una segunda corrida idéntica salga gratis e instantánea.
 
-### 3. Trabajar escenario por escenario
+### 3. Leer las conversaciones ya evaluadas
+
+Para revisar una entrega sin ejecutar nada ni tener credenciales:
+
+```bash
+.venv/bin/python src/runner.py --ver 4
+```
+
+Lee el JSON de `output/ejercicio-1/` y muestra los **6 turnos** del escenario:
+qué preguntó el usuario simulado, qué respondió el asistente, qué nota de
+coherencia puso el juez con su justificación, los hallazgos de cada turno y la
+latencia. No llama al modelo.
+
+Es la forma pensada para quien evalúa este proyecto: los seis intercambios de
+cada escenario deberían poder leerse sin configurar un proveedor ni gastar
+llamadas.
+
+### 4. Trabajar escenario por escenario
 
 Para iterar sobre un escenario concreto, sin gastar los otros cuatro:
 

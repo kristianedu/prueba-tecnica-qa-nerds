@@ -55,6 +55,7 @@ npm install && npx playwright install chromium
 # Ejercicio 1 — evaluación conversacional
 cd ejercicio-1-llm-eval
 .venv/bin/python -m pytest tests/ -v                     # 74 pruebas del evaluador
+.venv/bin/python src/runner.py --ver 4                   # leer los 6 turnos ya evaluados
 .venv/bin/python src/runner.py --todos --proveedor groq  # evaluación real
 
 # Ejercicios 2 y 3

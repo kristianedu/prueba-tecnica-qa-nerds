@@ -188,6 +188,46 @@ def _ruta_legible(ruta: Path) -> str:
         return str(ruta)
 
 
+def mostrar_guardado(id_escenario: int, dir_salida: Path) -> int:
+    """
+    Imprime la conversación de un escenario ya evaluado, leyéndola del JSON.
+
+    No llama al modelo ni necesita credenciales: es para revisar una entrega ya
+    hecha. Quien evalúe este proyecto debería poder leer las seis conversaciones
+    sin configurar nada ni gastar llamadas.
+    """
+    archivo = dir_salida / f"escenario-{id_escenario}.json"
+    if not archivo.exists():
+        print(f"No existe {archivo}. Corre primero la evaluación.", file=sys.stderr)
+        return 2
+
+    d = json.loads(archivo.read_text(encoding="utf-8"))
+    ej = d.get("ejecucion", {})
+
+    print(f"\n  Escenario {d['escenario_id']}: {d['escenario']}")
+    print(f"  Objetivo: {d['objetivo']}")
+    print(f"  {ej.get('proveedor')} · asistente {ej.get('modelo_asistente')} "
+          f"· juez {ej.get('modelo_juez')} · {ej.get('fecha_utc')}")
+
+    pares = [d["turnos"][i:i + 2] for i in range(0, len(d["turnos"]), 2)]
+    for n, par in enumerate(pares, 1):
+        usuario, asistente = par[0], par[1]
+        ev = asistente.get("evaluacion", {})
+        print(f"\n  ┌─ turno {n} de {len(pares)} " + "─" * 58)
+        print(f"  │ USUARIO    {_envolver(usuario['mensaje'])}")
+        print(f"  │ ASISTENTE  {_envolver(asistente['mensaje'])}")
+        print(f"  │ coherencia {ev.get('coherencia')} — {_envolver(str(ev.get('justificacion', '')))}")
+        for h in ev.get("hallazgos", []):
+            print(f"  │ ✗ [{h['severidad']}] {h['tipo']}: {_envolver(h['descripcion'])}")
+        if not ev.get("hallazgos"):
+            print("  │ ✓ sin hallazgos")
+        print(f"  └─ {asistente.get('latencia_ms')} ms")
+
+    print(f"\n  Veredicto: {d['veredicto']}  {json.dumps(d['metricas'], ensure_ascii=False)}")
+    print(f"  {_envolver(d['analisis'], sangria='  ')}\n")
+    return 0
+
+
 def main() -> int:
     load_dotenv(RAIZ / ".env")
     ap = argparse.ArgumentParser(description="Evaluación conversacional de agentes LLM")
@@ -199,10 +239,16 @@ def main() -> int:
     ap.add_argument("--sin-cache", action="store_true")
     ap.add_argument("--detalle", action="store_true",
                     help="muestra la conversación completa y la evaluación de cada turno")
+    ap.add_argument("--ver", type=int, metavar="N",
+                    help="muestra la conversación de un escenario ya evaluado, "
+                         "leyéndola del JSON (sin credenciales ni llamadas)")
     ap.add_argument("--listar-modelos", action="store_true",
                     help="consulta al proveedor qué modelos ofrece y termina")
     ap.add_argument("--salida", type=Path, default=DIR_SALIDA)
     args = ap.parse_args()
+
+    if args.ver is not None:
+        return mostrar_guardado(args.ver, args.salida)
 
     if args.listar_modelos:
         cliente = ClienteLLM(proveedor=args.proveedor)
