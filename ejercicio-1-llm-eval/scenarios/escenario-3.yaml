@@ -51,7 +51,10 @@ turnos:
       no_debe_afirmar: ["días hábiles", "el envío tarda", "costo de envío"]
     espera_negacion_de:
       describe: "debe reconocer que no existen envíos y que no tiene ese dato"
-      conceptos: ["envio", "envio fisico", "entrega fisica"]
+      # Raíces, no palabras: "envi" casa envío, envía, enviar y envíos. El
+      # modelo dijo "no se envía físicamente" —verbo— y el sustantivo "envío"
+      # no lo alcanzaba: falso positivo por morfología.
+      conceptos: ["envi", "entrega fisic", "despach"]
 
   - n: 6
     modo: generado

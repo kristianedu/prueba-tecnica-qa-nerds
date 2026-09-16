@@ -132,8 +132,14 @@ juez y volver a evaluar en milisegundos, sin pagar de nuevo:
 .venv/bin/python src/runner.py --escenario 4 --detalle --sin-cache
 ```
 
-Ojo con lo segundo: el modelo no es determinista, así que `--sin-cache` puede
-dar un veredicto distinto sobre el mismo escenario. Es una propiedad del sujeto
+`--sin-cache` fuerza llamadas nuevas **y las guarda**: la corrida real queda como
+base, y a partir de ahí cada reevaluación —cambiar un umbral, un matcher, la
+rúbrica— sale de disco. Antes apagaba la caché por completo, así que una corrida
+de seis minutos no quedaba en ningún sitio y la siguiente "reevaluación" volvía
+a llamar al modelo y daba otros números.
+
+Ojo: el modelo no es determinista, así que dos corridas con `--sin-cache` pueden
+dar veredictos distintos sobre el mismo escenario. Es una propiedad del sujeto
 bajo prueba, no de la suite.
 
 ## Resultados de la corrida real

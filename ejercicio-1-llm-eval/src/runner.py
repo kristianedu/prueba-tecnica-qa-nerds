@@ -236,7 +236,9 @@ def main() -> int:
     ap.add_argument("--proveedor", help="groq | anthropic | openai")
     ap.add_argument("--modelo", help="modelo del asistente")
     ap.add_argument("--modelo-juez", help="modelo del juez")
-    ap.add_argument("--sin-cache", action="store_true")
+    ap.add_argument("--sin-cache", action="store_true",
+                    help="fuerza llamadas nuevas al modelo y las guarda, "
+                         "dejando esta corrida como base para reevaluar gratis")
     ap.add_argument("--detalle", action="store_true",
                     help="muestra la conversación completa y la evaluación de cada turno")
     ap.add_argument("--ver", type=int, metavar="N",
@@ -263,7 +265,7 @@ def main() -> int:
 
     cliente = ClienteLLM(
         proveedor=args.proveedor, modelo=args.modelo,
-        cache=not args.sin_cache,
+        refrescar=args.sin_cache,
     )
     juez = Juez(cliente, modelo=args.modelo_juez or os.getenv("JUDGE_MODEL") or cliente.modelo)
     usuario = UsuarioSimulado(cliente)

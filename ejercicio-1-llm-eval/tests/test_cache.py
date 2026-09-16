@@ -82,3 +82,22 @@ def test_desactivada_no_escribe_ni_lee(tmp_path):
     cache.escribir(clave, {"texto": "algo"})
     assert cache.leer(clave) is None
     assert list(tmp_path.glob("*.json")) == []
+
+
+def test_refrescar_ignora_lo_guardado_pero_si_escribe(tmp_path):
+    """
+    `--sin-cache` tiene que forzar llamadas nuevas Y guardarlas. Antes apagaba
+    la caché por completo: una corrida real de seis minutos no quedaba en ningún
+    sitio y la siguiente reevaluación volvía a llamar al modelo.
+    """
+    clave = CacheEnDisco.clave(**BASE)
+
+    vieja = CacheEnDisco(tmp_path)
+    vieja.escribir(clave, {"texto": "respuesta antigua"})
+
+    refresco = CacheEnDisco(tmp_path, refrescar=True)
+    assert refresco.leer(clave) is None                 # no reutiliza lo viejo
+    refresco.escribir(clave, {"texto": "respuesta nueva"})
+
+    despues = CacheEnDisco(tmp_path)
+    assert despues.leer(clave)["texto"] == "respuesta nueva"   # y quedó guardada

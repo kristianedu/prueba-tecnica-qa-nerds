@@ -240,3 +240,16 @@ def test_la_afirmacion_contraria_si_se_sigue_cazando():
     _, res = _evaluar(2, 5, "¡Sí tenemos app! Descárgala en el App Store.")
     assert res.checks["nego_lo_inexistente"] is False
     assert "alucinacion" in _tipos(res)
+
+
+def test_negacion_con_el_verbo_en_vez_del_sustantivo():
+    """
+    Cuarto falso positivo de la misma familia, también de una corrida real:
+    "no se envía físicamente" niega el envío con el VERBO. El concepto estaba
+    declarado como sustantivo ("envio") y la frontera de palabra no lo alcanza.
+    Los conceptos pasan a ser raíces ("envi"), que casan todas las formas.
+    """
+    _, res = _evaluar(3, 5, "Lumen Desk es un software digital, por lo que no se "
+                            "envía físicamente. Una vez que completes la compra, "
+                            "tendrás acceso inmediato a la aplicación.")
+    assert res.checks["nego_lo_inexistente"] is True

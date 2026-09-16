@@ -86,9 +86,16 @@ class RespuestaLLM:
 class CacheEnDisco:
     """Caché de respuestas indexada por el hash de la petición completa."""
 
-    def __init__(self, directorio: str | Path, activa: bool = True):
+    def __init__(self, directorio: str | Path, activa: bool = True,
+                 refrescar: bool = False):
         self.dir = Path(directorio)
         self.activa = activa
+        # `refrescar` ignora lo guardado pero SÍ escribe: fuerza llamadas nuevas
+        # y deja esa corrida como base para reevaluar después sin pagar. Apagar
+        # la caché del todo (activa=False) hacía que una corrida real de seis
+        # minutos no quedara en ningún sitio, y la siguiente "reevaluación"
+        # volviera a llamar al modelo y diera otros números.
+        self.refrescar = refrescar
         if self.activa:
             self.dir.mkdir(parents=True, exist_ok=True)
 
@@ -98,7 +105,7 @@ class CacheEnDisco:
         return hashlib.sha256(canonico.encode("utf-8")).hexdigest()[:32]
 
     def leer(self, clave: str) -> dict[str, Any] | None:
-        if not self.activa:
+        if not self.activa or self.refrescar:
             return None
         archivo = self.dir / f"{clave}.json"
         if not archivo.exists():
@@ -125,6 +132,7 @@ class ClienteLLM:
         modelo: str | None = None,
         *,
         cache: bool = True,
+        refrescar: bool = False,
         directorio_cache: str | Path = ".llm-cache",
         reintentos: int = 3,
     ):
@@ -136,7 +144,7 @@ class ClienteLLM:
             )
         self.modelo = modelo or os.getenv("LLM_MODEL", "openai/gpt-oss-20b")
         self.reintentos = reintentos
-        self.cache = CacheEnDisco(directorio_cache, activa=cache)
+        self.cache = CacheEnDisco(directorio_cache, activa=cache, refrescar=refrescar)
         self._sdk: Any = None
 
     # ------------------------------------------------------------------ API
