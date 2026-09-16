@@ -7,14 +7,14 @@
     "tipo": "panel inline (isla de Astro en el documento principal, no iframe)",
     "identidad_declarada": "You're chatting with an AI agent."
   },
-  "generado_utc": "2026-09-16T02:54:52.611Z",
+  "generado_utc": "2026-09-16T21:57:54.508Z",
   "metodologia": "tiempo_respuesta_ms va del clic en Enviar a la primera burbuja del bot con texto visible (time to first token): es la métrica principal, porque no depende de lo larga que sea la respuesta. tiempo_respuesta_completa_ms mide hasta que el streaming deja de crecer, a título informativo.",
   "resumen": {
     "total_interacciones": 2,
     "respuestas_recibidas": 2,
-    "tiempo_respuesta_ms_promedio": 1365,
-    "tiempo_respuesta_ms_min": 1112,
-    "tiempo_respuesta_ms_max": 1617
+    "tiempo_respuesta_ms_promedio": 1867,
+    "tiempo_respuesta_ms_min": 1611,
+    "tiempo_respuesta_ms_max": 2122
   },
   "interacciones": [
     {
@@ -22,9 +22,9 @@
       "caso": "envía \"Hola\", recibe respuesta y registra el tiempo",
       "mensaje_enviado": "Hola",
       "respuesta_recibida": true,
-      "tiempo_respuesta_ms": 1617,
-      "tiempo_respuesta_completa_ms": 3039,
-      "timestamp_utc": "2026-09-16T02:54:45.741Z",
+      "tiempo_respuesta_ms": 2122,
+      "tiempo_respuesta_completa_ms": 2833,
+      "timestamp_utc": "2026-09-16T21:57:46.059Z",
       "extracto_respuesta": "I'm here specifically for Botpress documentation questions. Ask me about Studio, the ADK, Webchat, the HTTP APIs, integrations, or Desk and I can help."
     },
     {
@@ -32,9 +32,9 @@
       "caso": "el historial conserva la conversación tras cerrar y reabrir el panel",
       "mensaje_enviado": "Hola",
       "respuesta_recibida": true,
-      "tiempo_respuesta_ms": 1112,
-      "tiempo_respuesta_completa_ms": 2536,
-      "timestamp_utc": "2026-09-16T02:54:50.056Z",
+      "tiempo_respuesta_ms": 1611,
+      "tiempo_respuesta_completa_ms": 3030,
+      "timestamp_utc": "2026-09-16T21:57:51.461Z",
       "extracto_respuesta": "I'm here specifically for Botpress documentation questions. Ask me about Studio, the ADK, Webchat, the HTTP APIs, integrations, or Desk and I can help."
     }
   ]

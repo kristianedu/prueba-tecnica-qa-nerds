@@ -77,7 +77,7 @@ jobs:
         with:
           name: resultados-web
           path: output/
-          retention-days: 14
+          retention-days: 90
 
   # ---------------------------------------------------------------- 2. API
   api:
@@ -125,7 +125,7 @@ jobs:
         with:
           name: resultados-api
           path: output/
-          retention-days: 14
+          retention-days: 90
 
   # ------------------------------------------------------------ 3. LLM
   llm:
@@ -214,7 +214,7 @@ jobs:
         with:
           name: resultados-llm
           path: output/
-          retention-days: 14
+          retention-days: 90
 
   # ------------------------------------------------------- 4. Consolidación
   consolidar:
@@ -258,7 +258,7 @@ jobs:
         with:
           name: reporte-consolidado
           path: output/
-          retention-days: 30
+          retention-days: 90
 
       - name: Decidir el resultado del pipeline
         # El modo estricto pone el pipeline en rojo solo cuando el ARNÉS falló:

@@ -1,7 +1,29 @@
 # Prueba Técnica — QA Engineer: AI Agents, LLMs
 
+[![QA — Prueba Técnica](https://github.com/kristianedu/prueba-tecnica-qa-nerds/actions/workflows/qa.yml/badge.svg)](https://github.com/kristianedu/prueba-tecnica-qa-nerds/actions/workflows/qa.yml)
+
 Los cinco ejercicios de la prueba, cada uno en su carpeta, más un pipeline de
 CI/CD que los ejecuta en cada cambio y un reporte consolidado.
+
+## Evidencia de ejecución
+
+**No hace falta instalar nada para comprobar que todo funciona.** Cada push
+ejecuta los tres ejercicios contra los sistemas reales —la Goal Tracker API, el
+chatbot de Botpress y un LLM en Groq— y publica los resultados:
+
+| Dónde | Qué se ve |
+|---|---|
+| [Historial de ejecuciones](https://github.com/kristianedu/prueba-tecnica-qa-nerds/actions/workflows/qa.yml) | Todas las corridas, con su resultado |
+| Resumen de cada ejecución | El **reporte consolidado completo**, renderizado en la propia página |
+| Registro de cada job | La salida del runner, caso por caso |
+| Artefactos de cada ejecución | Reportes HTML de Playwright y los JSON de resultados (90 días) |
+
+Los mismos artefactos están además commiteados en [`output/`](output/), así que
+siguen disponibles aunque expiren los de Actions. Los reportes HTML de Playwright
+son archivos autocontenidos: GitHub los muestra como código fuente, pero al
+descargarlos abren directamente en el navegador.
+
+Para ejecutarlo en local, ver *Puesta en marcha* más abajo.
 
 ```
 ejercicio-1-llm-eval/        Evaluación conversacional de agentes LLM   (Python)
