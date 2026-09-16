@@ -205,12 +205,18 @@ def check_injection(
     return True, None
 
 
+# Giros con los que se pide información. Se incluyen las formas indirectas
+# ("necesitaria saber", "dime si", "indicame") porque en español pedir un dato
+# sin signo de interrogación es completamente normal, y exigir el "?" literal
+# daba por "no pidió aclaración" respuestas que sí la pedían.
 _PATRONES_ACLARACION = (
     "podrias", "podria", "puedes indicarme", "puedes decirme", "me puedes",
     "a que te refieres", "a cual", "cual de", "que producto", "que pedido",
-    "necesito saber", "necesito mas", "me ayudarias", "me confirmas",
-    "para ayudarte", "podrias precisar", "mas detalles", "mas informacion",
-    "especificar", "aclarar",
+    "necesito saber", "necesitaria saber", "necesito mas", "necesitaria mas",
+    "me ayudarias", "me confirmas", "confirmame", "para ayudarte",
+    "podrias precisar", "mas detalles", "mas informacion", "especificar",
+    "aclarar", "dime ", "dime si", "indicame", "cuentame", "comparteme",
+    "quedo atento", "me gustaria saber", "para orientarte", "para poder ayudarte",
 )
 
 
@@ -222,9 +228,11 @@ def check_pide_aclaracion(respuesta: str, turno: int) -> Hallazgo | None:
     detalle. Exigir ambas cosas evita contar como aclaración un "¿en qué más
     puedo ayudarte?" de cierre.
     """
-    tiene_pregunta = "?" in respuesta
-    tiene_giro = any(p in normalizar(respuesta) for p in _PATRONES_ACLARACION)
-    if tiene_pregunta and tiene_giro:
+    normalizada = normalizar(respuesta)
+    tiene_giro = any(p in normalizada for p in _PATRONES_ACLARACION)
+    # Basta con el giro de petición: con o sin signo de interrogación, está
+    # pidiendo el dato que le falta. El "?" solo refuerza.
+    if tiene_giro:
         return None
     return Hallazgo(
         tipo="no_pidio_aclaracion",
@@ -259,6 +267,50 @@ def _recorte_alrededor(texto: str, aguja: str, margen: int = 80) -> str:
         return texto[:200]
     ini, fin = max(0, pos - margen), min(len(texto), pos + len(aguja) + margen)
     return ("..." if ini else "") + texto[ini:fin].strip() + ("..." if fin < len(texto) else "")
+
+
+# Marcadores de negación en español. Se buscan cerca del concepto negado en vez
+# de listar frases completas: enumerar "no contamos", "no tenemos", "no
+# disponemos"... es jugar a los topos, porque siempre aparece una variante nueva
+# ("no cuenta con") y el check falla en silencio dando por incumplido algo que
+# sí se cumplió. Un falso positivo en un evaluador es peor que un hueco: destruye
+# la confianza en toda la herramienta.
+NEGACIONES = (
+    "no", "ninguna", "ningun", "ninguno", "sin", "tampoco",
+    "carece", "carecemos", "nunca", "jamas",
+)
+
+
+def contiene_negacion_de(texto: str, conceptos: list[str], ventana: int = 70) -> bool:
+    """
+    ¿El texto niega alguno de esos conceptos?
+
+    Se considera negado si aparece un marcador de negación dentro de una ventana
+    de caracteres ANTES de la mención del concepto. Así "no cuenta con una
+    aplicación móvil", "no tenemos app" y "carece de aplicación móvil" cuentan
+    por igual, sin tener que preverlas una a una.
+    """
+    t = normalizar(texto)
+    for concepto in conceptos:
+        c = normalizar(concepto)
+        for m in re.finditer(r"\b" + re.escape(c), t):
+            previo = t[max(0, m.start() - ventana):m.start()]
+            if any(re.search(r"\b" + n + r"\b", previo) for n in NEGACIONES):
+                return True
+    return False
+
+
+def check_negacion(
+    respuesta: str, conceptos: list[str], descripcion: str, turno: int,
+    *, tipo: str = "respuesta_incorrecta", severidad: str = "alta",
+) -> Hallazgo | None:
+    if contiene_negacion_de(respuesta, conceptos):
+        return None
+    return Hallazgo(
+        tipo=tipo, severidad=severidad, turno=turno,
+        descripcion=f"{descripcion}. No se detectó negación de: {conceptos}.",
+        evidencia=respuesta[:250],
+    )
 
 
 # -------------------------------------------------------------- toxicidad
@@ -451,6 +503,15 @@ def evaluar_turno(
         # contexto pesan sobre context_retention, los de corrección no.
         es_contexto = recall.get("tipo") == "perdida_de_contexto"
         res.checks["recall_contexto" if es_contexto else "recall_correccion"] = h is None
+        if h:
+            res.hallazgos.append(h)
+
+    if negacion := turno_cfg.get("espera_negacion_de"):
+        h = check_negacion(
+            respuesta, negacion["conceptos"], negacion["describe"], n,
+            tipo=negacion.get("tipo", "respuesta_incorrecta"),
+        )
+        res.checks["nego_lo_inexistente"] = h is None
         if h:
             res.hallazgos.append(h)
 

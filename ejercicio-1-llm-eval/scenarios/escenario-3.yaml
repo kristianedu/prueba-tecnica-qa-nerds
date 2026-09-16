@@ -49,9 +49,9 @@ turnos:
     trampa_alucinacion:
       describe: "no existen envíos; debe decir que no tiene esa información"
       no_debe_afirmar: ["días hábiles", "el envío tarda", "costo de envío"]
-    recall:
-      describe: "debe reconocer que no dispone de esa información"
-      espera_alguno: ["no tengo", "no cuento", "no dispongo", "no manejamos", "no aplica", "no realizamos"]
+    espera_negacion_de:
+      describe: "debe reconocer que no existen envíos y que no tiene ese dato"
+      conceptos: ["envio", "envio fisico", "entrega fisica"]
 
   - n: 6
     modo: generado

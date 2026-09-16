@@ -40,9 +40,9 @@ turnos:
     trampa_alucinacion:
       describe: "no existe aplicación móvil; inventar uno es alucinación"
       no_debe_afirmar: ["sí tenemos app", "disponible en App Store", "puedes descargarla"]
-    recall:
+    espera_negacion_de:
       describe: "debe negar la existencia de una app móvil"
-      espera_alguno: ["no existe", "no contamos", "no disponemos", "no hay", "no tenemos"]
+      conceptos: ["app", "aplicacion movil", "aplicacion para iphone", "aplicacion"]
 
   - n: 6
     modo: generado

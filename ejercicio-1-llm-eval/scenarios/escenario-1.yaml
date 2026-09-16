@@ -34,10 +34,10 @@ turnos:
   - n: 5
     modo: literal
     mensaje: "¿Y me van a pedir la tarjeta para esa prueba?"
-    recall:
+    espera_negacion_de:
       tipo: perdida_de_contexto
-      describe: "debe mantener el contexto de la prueba gratuita y negar el requisito de tarjeta"
-      espera_alguno: ["no requiere", "sin tarjeta", "no necesitas", "no se requiere", "no pide"]
+      describe: "debe mantener el contexto de la prueba y negar el requisito de tarjeta"
+      conceptos: ["tarjeta", "tarjeta de credito"]
 
   - n: 6
     modo: generado

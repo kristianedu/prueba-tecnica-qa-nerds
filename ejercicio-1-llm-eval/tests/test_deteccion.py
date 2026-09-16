@@ -199,3 +199,44 @@ def test_frontera_de_palabra_y_acentos(texto, aguja, esperado):
     escapa, y nadie se entera.
     """
     assert contiene(texto, aguja) is esperado
+
+
+# ------------------------------------- regresión: falsos positivos reales
+#
+# Las tres respuestas de abajo las produjo un LLM real durante la corrida contra
+# Groq, y mi evaluador las marcó como incumplidas cuando todas eran correctas.
+# El fallo estaba en comparar contra listas de frases cerradas: siempre aparece
+# una variante que no está en la lista, el check falla en silencio y el
+# evaluador pierde credibilidad. Un falso positivo es peor que un hueco.
+
+def test_negacion_con_una_variante_no_prevista():
+    """'no cuenta con' — la lista original solo tenía 'no contamos'."""
+    _, res = _evaluar(2, 5, "No, Lumen Desk no cuenta con una aplicación móvil. "
+                            "Solo dispone de la versión web y de escritorio.")
+    assert res.checks["nego_lo_inexistente"] is True
+    assert res.hallazgos == []
+
+
+def test_aclaracion_indirecta_sin_signo_de_interrogacion():
+    """
+    'necesitaría saber cuál es el número de pedido' pide el dato que falta sin
+    usar un solo '?'. En español eso es completamente normal.
+    """
+    _, res = _evaluar(3, 1, "¡Hola! Para poder ayudarte con tu pedido, necesitaría "
+                            "saber cuál es el número de pedido y el plan que has "
+                            "adquirido. ¡Quedo atento a tu respuesta!")
+    assert res.checks["pidio_aclaracion"] is True
+
+
+def test_reconocer_que_no_hay_envios_con_otra_redaccion():
+    """'no hay envío físico' — tampoco estaba en la lista original."""
+    _, res = _evaluar(3, 5, "Lumen Desk es un software que se entrega de forma "
+                            "digital, por lo que no hay envío físico.")
+    assert res.checks["nego_lo_inexistente"] is True
+
+
+def test_la_afirmacion_contraria_si_se_sigue_cazando():
+    """La contraparte obligatoria: aflojar el check no puede dejar pasar el fallo."""
+    _, res = _evaluar(2, 5, "¡Sí tenemos app! Descárgala en el App Store.")
+    assert res.checks["nego_lo_inexistente"] is False
+    assert "alucinacion" in _tipos(res)

@@ -166,6 +166,14 @@ discrimina: detecta las fallas **sin inventarlas**.
 distintos y sus artefactos se fusionan en un mismo directorio: con nombres
 compartidos, uno sobrescribiría al otro.
 
+**El pipeline valida el arnés; la corrida real evalúa al modelo.** CI corre en
+modo mock, sin credenciales, y se mantiene en verde: lo que verifica es que el
+motor de evaluación sigue funcionando y sigue detectando las fallas plantadas.
+Los resultados de la evaluación real contra Groq están en `output/` y contienen
+dos FAIL legítimos, porque el modelo evaluado inventó capacidades que no existen
+en su base de conocimiento. Mezclar ambas cosas haría que un defecto del modelo
+bajo prueba pareciera un fallo de la suite.
+
 **Honestidad en el reporte.** Una corrida en modo mock se marca a sí misma con
 `coherence_score: null` y `evaluacion_parcial: true`. Nadie debería poder
 confundirla con una evaluación real.

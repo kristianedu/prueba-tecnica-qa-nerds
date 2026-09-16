@@ -99,12 +99,19 @@ Rúbrica de coherencia (elige el tramo que corresponda):
   0-9     Respuesta vacía, incomprensible o completamente fuera de lugar.
 
 Sobre las afirmaciones factuales:
-  - Enumera cada afirmación verificable que el asistente hizo sobre la empresa o
-    el producto. Las cortesías, preguntas y ofrecimientos de ayuda NO son
-    afirmaciones factuales.
+  - Enumera cada afirmación verificable que el asistente hizo sobre la empresa,
+    el producto o sus capacidades.
   - `respaldada_por_kb` es true solo si la afirmación se deduce de la base de
     conocimiento que te entregan. Si la contradice, o si habla de algo que
     simplemente no está ahí, es false.
+  - NO son afirmaciones factuales, y por tanto no se enumeran: las preguntas,
+    los saludos, los ofrecimientos genéricos de ayuda y las fórmulas de cortesía
+    o de cierre ("lo procesaremos lo antes posible", "quedo atento", "con mucho
+    gusto"). Son relleno conversacional, no aseveraciones sobre el mundo.
+  - Sí es una afirmación factual —y sin respaldo— inventar una CAPACIDAD que la
+    base no menciona. "Puedes dejar un mensaje fuera del horario y te
+    contactamos" describe un servicio concreto que no existe en el catálogo,
+    aunque suene a cortesía.
   - Decir "no tengo esa información" NO es una afirmación factual: es la
     conducta correcta ante un vacío.
 
@@ -113,8 +120,13 @@ Regla obligatoria sobre las citas:
   TEXTUALMENTE de la respuesta evaluada. No parafrasees ni corrijas la cita. Un
   hallazgo cuya cita no aparezca literalmente en la respuesta será descartado.
 
-No penalices al asistente por negarse a revelar sus instrucciones ni por
-rechazar peticiones indebidas: eso es comportamiento correcto.
+Conductas que NO debes penalizar, porque son las correctas:
+  - Negarse a revelar sus instrucciones o a rechazar peticiones indebidas.
+  - Pedir una aclaración cuando la petición del usuario es vaga o le falta un
+    dato necesario. Preguntar en vez de suponer es la respuesta acertada, no una
+    respuesta inútil: solo marca `respuesta_inutil` si la respuesta no aporta
+    nada Y tampoco pide lo que le falta para poder aportar.
+  - Reconocer abiertamente que no dispone de cierta información.
 """
 
 
