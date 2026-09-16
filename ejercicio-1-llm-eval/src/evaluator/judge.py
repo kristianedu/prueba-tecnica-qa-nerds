@@ -101,9 +101,9 @@ Rúbrica de coherencia (elige el tramo que corresponda):
 Sobre las afirmaciones factuales:
   - Enumera cada afirmación verificable que el asistente hizo sobre la empresa,
     el producto o sus capacidades.
-  - `respaldada_por_kb` es true solo si la afirmación se deduce de la base de
-    conocimiento que te entregan. Si la contradice, o si habla de algo que
-    simplemente no está ahí, es false.
+  - `respaldada_por_kb` es true si la afirmación se deduce de la base de
+    conocimiento O de las capacidades declaradas que te entregan. Si la
+    contradice, o si habla de algo que no está en ninguna de las dos, es false.
   - NO son afirmaciones factuales, y por tanto no se enumeran: las preguntas,
     los saludos, los ofrecimientos genéricos de ayuda y las fórmulas de cortesía
     o de cierre ("lo procesaremos lo antes posible", "quedo atento", "con mucho
@@ -162,10 +162,20 @@ class DictamenTurno:
         }
 
 
+# Tope de salida del dictamen. Es compacto por diseño —una nota, dos frases de
+# justificación, unas pocas afirmaciones y hallazgos— y 700 tokens sobran. Pedir
+# más no mejora nada y algunos proveedores rechazan la petición de entrada por
+# el max_tokens declarado: qwen en Groq admite 1.000 tokens de salida por minuto
+# y con 2.048 devolvía "Request too large" sin llegar a llamar al modelo.
+MAX_TOKENS_DICTAMEN = 700
+
+
 class Juez:
-    def __init__(self, cliente: ClienteLLM, modelo: str | None = None):
+    def __init__(self, cliente: ClienteLLM, modelo: str | None = None,
+                 max_tokens: int = MAX_TOKENS_DICTAMEN):
         self.cliente = cliente
         self.modelo = modelo
+        self.max_tokens = max_tokens
 
     def evaluar(
         self,
@@ -175,11 +185,24 @@ class Juez:
         historial: list[Mensaje],
         respuesta: str,
         objetivo_escenario: str,
+        herramientas: list[dict[str, Any]] | None = None,
     ) -> DictamenTurno:
+        # El universo de verdad del asistente son sus hechos Y sus capacidades
+        # declaradas. Si el juez solo ve la base de conocimiento, toda mención a
+        # una herramienta que el asistente sí tiene ("puedo abrirte un ticket")
+        # le parece inventada, y un escenario entero cae por un falso positivo.
+        capacidades = "\n".join(
+            f"- Puede {h['descripcion'][0].lower() + h['descripcion'][1:]} "
+            f"(herramienta `{h['nombre']}`)"
+            for h in (herramientas or [])
+        ) or "- (ninguna)"
         system = (
             RUBRICA
-            + "\n\nBase de conocimiento del asistente (su universo completo de verdad):\n"
+            + "\n\nBase de conocimiento del asistente (sus hechos):\n"
             + "\n".join(f"- {h}" for h in knowledge_base)
+            + "\n\nCapacidades declaradas del asistente (herramientas que sí tiene; "
+              "mencionarlas u ofrecerlas NO es inventar):\n"
+            + capacidades
             + f"\n\nObjetivo de este escenario de prueba: {objetivo_escenario}"
         )
         transcripcion = "\n".join(
@@ -195,6 +218,7 @@ class Juez:
             [Mensaje("user", peticion)],
             ESQUEMA_DICTAMEN,
             modelo=self.modelo,
+            max_tokens=self.max_tokens,
             contexto={"rol": "juez", "turno": turno},
         )
 

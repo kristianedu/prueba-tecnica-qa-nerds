@@ -89,3 +89,24 @@ def test_la_cuota_diaria_pide_una_espera_larga():
     from llm_client import ESPERA_MAXIMA_S
     espera = segundos_de_espera(Exception(CUOTA_DIARIA))
     assert espera is not None and espera > ESPERA_MAXIMA_S    # se corta de inmediato
+
+
+TOPE_SALIDA = (
+    "Error code: 429 - Request too large for model `qwen/qwen3.8-27b` in organization "
+    "`org_x` service tier `on_demand` on output tokens per minute (OTPM): Limit 1000, "
+    "Requested 1329. The request's expected output tokens exceed the enforced limit; "
+    "reduce max_tokens (or the request's expected output) and try again."
+)
+
+
+def test_el_tope_de_salida_por_peticion_sugiere_bajar_max_tokens():
+    """
+    Tercer tipo de 429, distinto de los otros dos: no hay espera que valga porque
+    la petición se rechaza de entrada por el max_tokens declarado. El remedio es
+    pedir menos, y el diagnóstico tiene que decirlo con la bandera exacta.
+    """
+    d = _diagnostico(Exception(TOPE_SALIDA), "groq", "qwen/qwen3.8-27b")
+    assert "--max-tokens-juez" in d
+    assert "límite 1000, pedidos 1329" in d
+    assert "Cuota DIARIA" not in d
+    assert segundos_de_espera(Exception(TOPE_SALIDA)) is None   # no pide esperar

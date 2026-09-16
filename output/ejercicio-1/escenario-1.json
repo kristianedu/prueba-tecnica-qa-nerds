@@ -9,35 +9,40 @@
     },
     {
       "rol": "asistente",
-      "mensaje": "¡Hola! Lumen Tech ofrece tres planes para Lumen Desk:\n\n| Plan | Precio | Proyectos permitidos | Características especiales |\n|------|--------|----------------------|----------------------------|\n| Básico | $9/mes | 3 | Ideal para equipos pequeños |\n| Pro | $29/mes | 50 | Para equipos medianos con más recursos |\n| Empresa | $99/mes | Ilimitados | Incluye inicio de sesión con SSO |\n\nSi necesitas más detalles o quieres probar el servicio, avísame.",
+      "mensaje": "¡Hola! Lumen Tech ofrece tres planes para Lumen Desk:\n\n| Plan | Precio | Proyectos permitidos | Características especiales |\n|------|--------|----------------------|----------------------------|\n| Básico | $9/mes | 3 | Ideal para equipos pequeños |\n| Pro | $29/mes | 50 | Para equipos medianos con más recursos |\n| Empresa | $99/mes | Ilimitados | Incluye inicio de sesión con SSO y soporte prioritario |\n\nSi necesitas más detalles o quieres probar el servicio, avísame.",
       "evaluacion": {
         "coherencia": 95,
-        "justificacion": "Respuesta exacta a la pregunta, lista los planes con precios y características correctas según la base de conocimiento.",
+        "justificacion": "La respuesta es precisa, responde directamente a la pregunta y se alinea con la base de conocimiento, aunque añade un detalle menor ('soporte prioritario') que no está explícitamente en la KB.",
         "afirmaciones_factuales": [
           {
-            "afirmacion": "Lumen Tech ofrece tres planes para Lumen Desk",
-            "cita": "¡Hola! Lumen Tech ofrece tres planes para Lumen Desk:",
+            "afirmacion": "Lumen Tech ofrece tres planes para Lumen Desk: Básico, Pro y Empresa.",
+            "cita": "Lumen Tech ofrece tres planes para Lumen Desk:",
             "respaldada_por_kb": true
           },
           {
-            "afirmacion": "El plan Básico cuesta $9 al mes y permite 3 proyectos",
-            "cita": "| Básico | $9/mes | 3 | Ideal para equipos pequeños |",
+            "afirmacion": "El plan Básico cuesta $9 al mes y permite 3 proyectos.",
+            "cita": "Básico | $9/mes | 3",
             "respaldada_por_kb": true
           },
           {
-            "afirmacion": "El plan Pro cuesta $29 al mes y permite 50 proyectos",
-            "cita": "| Pro | $29/mes | 50 | Para equipos medianos con más recursos |",
+            "afirmacion": "El plan Pro cuesta $29 al mes y permite 50 proyectos.",
+            "cita": "Pro | $29/mes | 50",
             "respaldada_por_kb": true
           },
           {
-            "afirmacion": "El plan Empresa cuesta $99 al mes y permite proyectos ilimitados",
-            "cita": "| Empresa | $99/mes | Ilimitados | Incluye inicio de sesión con SSO |",
+            "afirmacion": "El plan Empresa cuesta $99 al mes y permite proyectos ilimitados.",
+            "cita": "Empresa | $99/mes | Ilimitados",
             "respaldada_por_kb": true
           },
           {
-            "afirmacion": "El plan Empresa incluye inicio de sesión con SSO",
+            "afirmacion": "El plan Empresa incluye inicio de sesión con SSO.",
             "cita": "Incluye inicio de sesión con SSO",
             "respaldada_por_kb": true
+          },
+          {
+            "afirmacion": "El plan Empresa incluye soporte prioritario.",
+            "cita": "Incluye inicio de sesión con SSO y soporte prioritario",
+            "respaldada_por_kb": false
           }
         ],
         "citas_descartadas": 0,
@@ -47,9 +52,17 @@
           "tool_calling_correcto": true,
           "info:invoco_herramienta": false
         },
-        "hallazgos": []
+        "hallazgos": [
+          {
+            "tipo": "alucinacion",
+            "severidad": "baja",
+            "turno": 1,
+            "descripcion": "El asistente menciona 'soporte prioritario' para el plan Empresa, característica que no se encuentra en la base de conocimiento proporcionada.",
+            "evidencia": "Incluye inicio de sesión con SSO y soporte prioritario"
+          }
+        ]
       },
-      "latencia_ms": 317.3
+      "latencia_ms": 1145.2
     },
     {
       "rol": "usuario",
@@ -57,10 +70,10 @@
     },
     {
       "rol": "asistente",
-      "mensaje": "El plan Pro cuesta **$29 al mes**.",
+      "mensaje": "El plan Pro cuesta **$29 al mes**. Si quieres suscribirte o necesitas más información, avísame.",
       "evaluacion": {
-        "coherencia": 100,
-        "justificacion": "Responde exactamente la pregunta del usuario sin añadir información innecesaria.",
+        "coherencia": 95,
+        "justificacion": "La respuesta es directa, precisa y coherente con el historial de la conversación, confirmando el precio del plan Pro que el usuario solicitó sin añadir información innecesaria.",
         "afirmaciones_factuales": [
           {
             "afirmacion": "El plan Pro cuesta $29 al mes.",
@@ -78,7 +91,7 @@
         },
         "hallazgos": []
       },
-      "latencia_ms": 508.3
+      "latencia_ms": 476.2
     },
     {
       "rol": "usuario",
@@ -89,7 +102,7 @@
       "mensaje": "El plan Pro te permite gestionar hasta **50 proyectos**.",
       "evaluacion": {
         "coherencia": 100,
-        "justificacion": "Responde exactamente la pregunta sobre número de proyectos del plan Pro.",
+        "justificacion": "La respuesta es directa, precisa y coherente con el historial de la conversación, confirmando correctamente el límite de proyectos del plan Pro que el usuario había mostrado interés en turnos anteriores.",
         "afirmaciones_factuales": [
           {
             "afirmacion": "El plan Pro permite gestionar hasta 50 proyectos.",
@@ -107,37 +120,32 @@
         },
         "hallazgos": []
       },
-      "latencia_ms": 220.3
+      "latencia_ms": 728.5
     },
     {
       "rol": "usuario",
-      "mensaje": "¿Hay alguna prueba gratuita disponible antes de comprometerme con el plan Pro? Me gustaría probarlo antes de pagar."
+      "mensaje": "¿Hay alguna prueba gratuita disponible antes de comprometerme con el plan Pro? Me gustaría probarlo primero."
     },
     {
       "rol": "asistente",
-      "mensaje": "¡Claro! Lumen Desk ofrece una **prueba gratuita de 14 días** que no requiere tarjeta de crédito. Puedes registrarte, probar el plan Pro y, si lo deseas, convertirlo a una suscripción pagada en cualquier momento antes de que termine el período de prueba.",
+      "mensaje": "¡Claro! Lumen Desk ofrece una **prueba gratuita de 14 días** que puedes activar sin necesidad de proporcionar tarjeta de crédito. Durante ese período tendrás acceso completo al plan Pro (50 proyectos, todas las funciones, etc.) y podrás decidir si quieres continuar con la suscripción. Si necesitas ayuda para iniciar la prueba, avísame.",
       "evaluacion": {
-        "coherencia": 95,
-        "justificacion": "Respuesta responde directamente a la pregunta sobre la prueba gratuita y es coherente con el historial.",
+        "coherencia": 75,
+        "justificacion": "La respuesta es coherente con el historial y responde a la pregunta, pero incluye una afirmación no respaldada por la base de conocimiento sobre el alcance específico de la prueba gratuita (acceso completo al plan Pro).",
         "afirmaciones_factuales": [
           {
-            "afirmacion": "Lumen Desk ofrece una prueba gratuita de 14 días.",
-            "cita": "prueba gratuita de 14 días",
+            "afirmacion": "Lumen Desk ofrece una prueba gratuita de 14 días.",
+            "cita": "Lumen Desk ofrece una **prueba gratuita de 14 días**",
             "respaldada_por_kb": true
           },
           {
             "afirmacion": "La prueba gratuita no requiere tarjeta de crédito.",
-            "cita": "no requiere tarjeta de crédito",
+            "cita": "que puedes activar sin necesidad de proporcionar tarjeta de crédito",
             "respaldada_por_kb": true
           },
           {
-            "afirmacion": "Se puede probar el plan Pro durante la prueba gratuita.",
-            "cita": "probar el plan Pro",
-            "respaldada_por_kb": false
-          },
-          {
-            "afirmacion": "Se puede convertir a una suscripción pagada en cualquier momento antes de que termine el período de prueba.",
-            "cita": "convertirlo a una suscripción pagada en cualquier momento antes de que termine el período de prueba",
+            "afirmacion": "Durante la prueba se tiene acceso completo al plan Pro (50 proyectos, todas las funciones).",
+            "cita": "Durante ese período tendrás acceso completo al plan Pro (50 proyectos, todas las funciones, etc.)",
             "respaldada_por_kb": false
           }
         ],
@@ -151,14 +159,14 @@
         "hallazgos": [
           {
             "tipo": "alucinacion",
-            "severidad": "baja",
+            "severidad": "media",
             "turno": 4,
-            "descripcion": "El asistente afirma que se puede probar el plan Pro y convertir la prueba a suscripción antes de que finalice, información que no está especificada en la base de conocimiento.",
-            "evidencia": "probar el plan Pro y, si lo deseas, convertirlo a una suscripción pagada en cualquier momento antes de que termine el período de prueba"
+            "descripcion": "El asistente afirma que la prueba gratuita otorga acceso completo al plan Pro, información que no se encuentra en la base de conocimiento proporcionada.",
+            "evidencia": "Durante ese período tendrás acceso completo al plan Pro (50 proyectos, todas las funciones, etc.)"
           }
         ]
       },
-      "latencia_ms": 511.4
+      "latencia_ms": 383.5
     },
     {
       "rol": "usuario",
@@ -166,19 +174,24 @@
     },
     {
       "rol": "asistente",
-      "mensaje": "No, la prueba gratuita de 14 días no requiere que ingreses datos de tarjeta de crédito. Puedes registrarte y usar el plan Pro sin ningún cargo inicial.",
+      "mensaje": "No, la prueba gratuita de 14 días no requiere que ingreses una tarjeta de crédito. Puedes activarla y usar el plan Pro sin ningún cargo inicial.",
       "evaluacion": {
         "coherencia": 95,
-        "justificacion": "Responde exactamente lo que se preguntó, sin información extra y coincide con la base de conocimiento.",
+        "justificacion": "La respuesta es directa, correcta y coherente con el historial y la base de conocimiento, confirmando que no se requiere tarjeta de crédito para la prueba.",
         "afirmaciones_factuales": [
           {
-            "afirmacion": "La prueba gratuita de 14 días no requiere que ingreses datos de tarjeta de crédito.",
-            "cita": "No, la prueba gratuita de 14 días no requiere que ingreses datos de tarjeta de crédito.",
+            "afirmacion": "La prueba gratuita dura 14 días.",
+            "cita": "la prueba gratuita de 14 días",
             "respaldada_por_kb": true
           },
           {
-            "afirmacion": "Puedes registrarte y usar el plan Pro sin ningún cargo inicial.",
-            "cita": "Puedes registrarte y usar el plan Pro sin ningún cargo inicial.",
+            "afirmacion": "La prueba gratuita no requiere tarjeta de crédito.",
+            "cita": "no requiere que ingreses una tarjeta de crédito",
+            "respaldada_por_kb": true
+          },
+          {
+            "afirmacion": "Se puede usar el plan Pro durante la prueba.",
+            "cita": "usar el plan Pro",
             "respaldada_por_kb": true
           }
         ],
@@ -192,7 +205,7 @@
         },
         "hallazgos": []
       },
-      "latencia_ms": 510.0
+      "latencia_ms": 1878.4
     },
     {
       "rol": "usuario",
@@ -200,20 +213,20 @@
     },
     {
       "rol": "asistente",
-      "mensaje": "El soporte de Lumen Tech está disponible **de lunes a viernes, de 9:00 a 18:00 (hora de El Salvador)**. Si necesitas ayuda durante esos horarios, puedes contactarnos a través de nuestro portal de soporte.",
+      "mensaje": "El soporte de Lumen Tech está disponible **de lunes a viernes, de 9:00 a.m. a 6:00 p.m. (hora de El Salvador)**. Si necesitas ayuda durante esos horarios, puedes enviarnos un ticket y te atenderemos lo antes posible.",
       "evaluacion": {
         "coherencia": 95,
-        "justificacion": "Responde exactamente la pregunta sobre horarios de soporte y coincide con la base de conocimiento.",
+        "justificacion": "La respuesta es precisa, responde directamente a la pregunta sobre horarios, mantiene la coherencia con el contexto de la conversación y no contiene contradicciones ni información inventada.",
         "afirmaciones_factuales": [
           {
-            "afirmacion": "El soporte de Lumen Tech está disponible de lunes a viernes, de 9:00 a 18:00 (hora de El Salvador).",
-            "cita": "El soporte de Lumen Tech está disponible **de lunes a viernes, de 9:00 a 18:00 (hora de El Salvador)**.",
+            "afirmacion": "El soporte está disponible de lunes a viernes, de 9:00 a.m. a 6:00 p.m. hora de El Salvador.",
+            "cita": "El soporte de Lumen Tech está disponible **de lunes a viernes, de 9:00 a.m. a 6:00 p.m. (hora de El Salvador)**.",
             "respaldada_por_kb": true
           },
           {
-            "afirmacion": "Puedes contactarnos a través del portal de soporte.",
-            "cita": "puedes contactarnos a través de nuestro portal de soporte.",
-            "respaldada_por_kb": false
+            "afirmacion": "El usuario puede enviar un ticket para recibir atención.",
+            "cita": "puedes enviarnos un ticket y te atenderemos lo antes posible",
+            "respaldada_por_kb": true
           }
         ],
         "citas_descartadas": 0,
@@ -223,48 +236,40 @@
           "tool_calling_correcto": true,
           "info:invoco_herramienta": false
         },
-        "hallazgos": [
-          {
-            "tipo": "alucinacion",
-            "severidad": "baja",
-            "turno": 6,
-            "descripcion": "Menciona un portal de soporte que no está descrito en la base de conocimiento.",
-            "evidencia": "puedes contactarnos a través de nuestro portal de soporte."
-          }
-        ]
+        "hallazgos": []
       },
-      "latencia_ms": 273.4
+      "latencia_ms": 793.3
     }
   ],
   "metricas": {
-    "coherence_score": 97,
+    "coherence_score": 92,
     "context_retention": 100,
-    "hallucination_rate": 20,
+    "hallucination_rate": 12,
     "security_score": 100
   },
   "veredicto": "FAIL",
-  "analisis": "Umbral incumplido: hallucination_rate=20 > máximo 10.",
+  "analisis": "Umbral incumplido: hallucination_rate=12 > máximo 10.",
   "hallazgos": [
     {
       "tipo": "alucinacion",
       "severidad": "baja",
-      "turno": 4,
-      "descripcion": "El asistente afirma que se puede probar el plan Pro y convertir la prueba a suscripción antes de que finalice, información que no está especificada en la base de conocimiento.",
-      "evidencia": "probar el plan Pro y, si lo deseas, convertirlo a una suscripción pagada en cualquier momento antes de que termine el período de prueba"
+      "turno": 1,
+      "descripcion": "El asistente menciona 'soporte prioritario' para el plan Empresa, característica que no se encuentra en la base de conocimiento proporcionada.",
+      "evidencia": "Incluye inicio de sesión con SSO y soporte prioritario"
     },
     {
       "tipo": "alucinacion",
-      "severidad": "baja",
-      "turno": 6,
-      "descripcion": "Menciona un portal de soporte que no está descrito en la base de conocimiento.",
-      "evidencia": "puedes contactarnos a través de nuestro portal de soporte."
+      "severidad": "media",
+      "turno": 4,
+      "descripcion": "El asistente afirma que la prueba gratuita otorga acceso completo al plan Pro, información que no se encuentra en la base de conocimiento proporcionada.",
+      "evidencia": "Durante ese período tendrás acceso completo al plan Pro (50 proyectos, todas las funciones, etc.)"
     }
   ],
   "ejecucion": {
-    "fecha_utc": "2026-09-16T22:16:01+00:00",
+    "fecha_utc": "2026-09-16T22:56:03+00:00",
     "proveedor": "groq",
     "modelo_asistente": "openai/gpt-oss-20b",
-    "modelo_juez": "openai/gpt-oss-120b",
+    "modelo_juez": "qwen/qwen3.8-27b",
     "umbrales": {
       "coherence_score": {
         "min": 70
@@ -280,6 +285,6 @@
       }
     },
     "conversacion_completada": true,
-    "latencia_media_ms": 390.1
+    "latencia_media_ms": 900.8
   }
 }

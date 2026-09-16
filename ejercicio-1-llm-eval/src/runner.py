@@ -127,6 +127,7 @@ def correr_escenario(esc: Escenario, cliente: ClienteLLM, juez: Juez,
             turno=n, knowledge_base=esc.knowledge_base,
             historial=historial[:-1], respuesta=r.texto,
             objetivo_escenario=esc.objetivo,
+            herramientas=esc.herramientas,
         )
         dictamenes.append(dic)
 
@@ -236,6 +237,9 @@ def main() -> int:
     ap.add_argument("--proveedor", help="groq | anthropic | openai")
     ap.add_argument("--modelo", help="modelo del asistente")
     ap.add_argument("--modelo-juez", help="modelo del juez")
+    ap.add_argument("--max-tokens-juez", type=int, default=None,
+                    help="tope de salida del dictamen (por defecto 700; bájalo si el "
+                         "proveedor limita los tokens de salida por minuto)")
     ap.add_argument("--sin-cache", action="store_true",
                     help="fuerza llamadas nuevas al modelo y las guarda, "
                          "dejando esta corrida como base para reevaluar gratis")
@@ -267,7 +271,11 @@ def main() -> int:
         proveedor=args.proveedor, modelo=args.modelo,
         refrescar=args.sin_cache,
     )
-    juez = Juez(cliente, modelo=args.modelo_juez or os.getenv("JUDGE_MODEL") or cliente.modelo)
+    juez = Juez(
+        cliente,
+        modelo=args.modelo_juez or os.getenv("JUDGE_MODEL") or cliente.modelo,
+        **({"max_tokens": args.max_tokens_juez} if args.max_tokens_juez else {}),
+    )
     usuario = UsuarioSimulado(cliente)
 
     escenarios = cargar_todos() if args.todos else [cargar_escenario(args.escenario)]

@@ -37,6 +37,7 @@ class ClienteDoble:
     def completar_json(self, system, mensajes, esquema, *, modelo=None,
                        max_tokens=2048, contexto=None):
         self.ultima_peticion = (system, mensajes, esquema, contexto)
+        self.ultimo_max_tokens = max_tokens
         meta = RespuestaLLM(
             texto="", modelo=modelo or "doble", proveedor="doble", latencia_ms=0.0,
         )
@@ -203,3 +204,34 @@ def test_campos_ausentes_no_revientan():
     assert d.coherencia == 70
     assert d.afirmaciones == []
     assert d.hallazgos == []
+
+
+def test_el_juez_conoce_las_capacidades_del_asistente():
+    """
+    Falso positivo real: el asistente ofreció abrir un ticket —herramienta que
+    sí tiene— y el juez, que solo veía la base de conocimiento, lo contó como
+    alucinación. Un escenario entero cayó por eso. Las capacidades declaradas
+    forman parte del universo de verdad y tienen que llegarle al juez.
+    """
+    cliente = ClienteDoble(_dictamen())
+    Juez(cliente).evaluar(
+        turno=2, knowledge_base=["Lumen Desk es un software."],
+        historial=[Mensaje("user", "Necesito ayuda.")],
+        respuesta="Puedo abrirte un ticket de soporte.",
+        objetivo_escenario="x",
+        herramientas=[{"nombre": "crear_ticket_soporte",
+                       "descripcion": "Abre un ticket de soporte para el usuario.",
+                       "argumentos": ["asunto", "detalle"]}],
+    )
+    system, _, _, _ = cliente.ultima_peticion
+    assert "crear_ticket_soporte" in system
+    assert "NO es inventar" in system
+
+
+def test_el_dictamen_pide_un_tope_de_salida_compacto():
+    """Ver MAX_TOKENS_DICTAMEN: pedir 2.048 hacía que qwen rechazara la petición."""
+    from evaluator.judge import MAX_TOKENS_DICTAMEN
+    cliente = ClienteDoble(_dictamen())
+    _juzgar(cliente)
+    assert cliente.ultimo_max_tokens == MAX_TOKENS_DICTAMEN
+    assert MAX_TOKENS_DICTAMEN <= 1000

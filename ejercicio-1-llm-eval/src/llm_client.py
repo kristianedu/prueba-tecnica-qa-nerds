@@ -365,6 +365,15 @@ def _diagnostico(exc: Exception, proveedor: str, modelo: str) -> str:
     texto = str(exc)
     bajo = texto.lower()
 
+    if "request too large" in bajo or "otpm" in bajo or "output tokens per minute" in bajo:
+        lim = re.search(r"Limit (\d+), Requested (\d+)", texto)
+        cifras = f" (límite {lim.group(1)}, pedidos {lim.group(2)})" if lim else ""
+        return (
+            f"\n\nEl proveedor limita los tokens de SALIDA por minuto para {modelo}{cifras}"
+            "\ny rechaza la petición por el max_tokens declarado, sin esperar posible."
+            "\nBaja el tope del dictamen con --max-tokens-juez (p. ej. 500) o usa otro"
+            "\nmodelo como juez (--modelo-juez)."
+        )
     if "tokens per day" in bajo or "tpd" in bajo:
         usado = re.search(r"Limit (\d+), Used (\d+)", texto)
         detalle = f" Llevas {usado.group(2)} de {usado.group(1)} tokens." if usado else ""
