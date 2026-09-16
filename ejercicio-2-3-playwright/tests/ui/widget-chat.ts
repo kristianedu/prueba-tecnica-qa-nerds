@@ -9,7 +9,7 @@
  * si Botpress vuelve a un iframe, baste con cambiar `raiz` por
  * `page.frameLocator(...)` y ningún spec se entere.
  */
-import { expect, type Locator, type Page } from '@playwright/test';
+import { expect, type Locator, type Page, type TestInfo } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -273,4 +273,27 @@ export function registrarMetrica(
 
   fs.mkdirSync(path.dirname(RUTA_METRICAS), { recursive: true });
   fs.writeFileSync(RUTA_METRICAS, JSON.stringify(informe, null, 2) + '\n', 'utf-8');
+}
+
+/**
+ * Captura una evidencia visual del estado actual y la deja en dos sitios:
+ * el directorio de salida del Ejercicio 3 y el propio reporte de Playwright.
+ *
+ * Playwright solo guarda capturas cuando algo falla, que es lo correcto para
+ * depurar pero deja la entrega sin una sola imagen cuando todo pasa. En un
+ * ejercicio de interfaz eso importa: un JSON con nombres de casos no demuestra
+ * que el chatbot respondiera, y una captura de la conversación sí.
+ */
+export async function capturarEvidencia(
+  page: Page,
+  nombre: string,
+  testInfo: TestInfo,
+): Promise<void> {
+  const destino = path.resolve(__dirname, '..', '..', '..', 'output', 'ejercicio-3', 'capturas');
+  fs.mkdirSync(destino, { recursive: true });
+
+  const archivo = path.join(destino, `${nombre}.png`);
+  const imagen = await page.screenshot({ path: archivo, fullPage: false });
+
+  await testInfo.attach(nombre, { body: imagen, contentType: 'image/png' });
 }

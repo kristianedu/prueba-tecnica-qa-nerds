@@ -3,7 +3,7 @@
  * (abrir, cerrar y leer el nombre del bot).
  */
 import { test, expect } from '@playwright/test';
-import { WidgetChat } from './widget-chat';
+import { WidgetChat, capturarEvidencia } from './widget-chat';
 
 test.describe('Ejercicio 3 — Widget de chat', () => {
   test('el widget existe y está montado en la página', async ({ page }) => {
@@ -20,7 +20,7 @@ test.describe('Ejercicio 3 — Widget de chat', () => {
     await expect(chat.botonEnviar).toBeVisible();
   });
 
-  test('el botón de cerrar colapsa el panel y el de abrir lo restaura', async ({ page }) => {
+  test('el botón de cerrar colapsa el panel y el de abrir lo restaura', async ({ page }, testInfo) => {
     const chat = new WidgetChat(page);
     await chat.ir();
 
@@ -30,6 +30,7 @@ test.describe('Ejercicio 3 — Widget de chat', () => {
 
     await chat.cerrar();
     await expect(chat.campoMensaje).toBeHidden();
+    await capturarEvidencia(page, '02-panel-cerrado', testInfo);
     // Al cerrar, el disparador debe seguir ahí: si no, el widget quedaría
     // inaccesible para el usuario.
     await expect(chat.botonAbrir).toBeVisible();
@@ -37,6 +38,7 @@ test.describe('Ejercicio 3 — Widget de chat', () => {
     await chat.abrir();
     await expect(chat.campoMensaje).toBeVisible();
     await expect(chat.botonEnviar).toBeVisible();
+    await capturarEvidencia(page, '02-panel-reabierto', testInfo);
   });
 
   test('el widget muestra su nombre y declara que es un agente de IA', async ({ page }) => {

@@ -6,6 +6,7 @@
  * (capa de render). Un 200 con la página en blanco seguiría siendo un fallo.
  */
 import { test, expect } from '@playwright/test';
+import { capturarEvidencia } from './widget-chat';
 
 /**
  * Se navega a '' en lugar de '/': el baseURL del proyecto `ui` lleva ruta
@@ -23,7 +24,7 @@ test.describe('Ejercicio 3 — Acceso al sitio de documentación', () => {
     expect(respuesta!.headers()['content-type']).toContain('text/html');
   });
 
-  test('los elementos clave de la página son visibles', async ({ page }) => {
+  test('los elementos clave de la página son visibles', async ({ page }, testInfo) => {
     await page.goto(RUTA, { waitUntil: 'domcontentloaded' });
 
     // El título es lo primero que se rompe si la ruta cambia o si un despliegue
@@ -40,5 +41,7 @@ test.describe('Ejercicio 3 — Acceso al sitio de documentación', () => {
 
     // Enlaces de navegación reales de la portada de docs.
     await expect(page.getByRole('link', { name: /Botpress Studio/ }).first()).toBeVisible();
+
+    await capturarEvidencia(page, '01-sitio-cargado', testInfo);
   });
 });

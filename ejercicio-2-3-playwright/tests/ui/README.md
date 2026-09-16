@@ -3,6 +3,36 @@
 Automatización del asistente de chat embebido en el sitio de documentación de
 Botpress (`https://botpress.com/docs`), con Playwright + TypeScript.
 
+
+## Evidencia de ejecución
+
+El enunciado pide *"screenshots o video, y/o reporte del test runner"*. Se
+entregan las tres cosas:
+
+| Artefacto | Dónde |
+|---|---|
+| Capturas de pantalla | `output/ejercicio-3/capturas/*.png` |
+| Reporte HTML del runner | `output/playwright-report-ui/index.html` |
+| Reporte JSON | `output/playwright-ui.json` |
+| Métricas de tiempo de respuesta | `output/ejercicio-3/metricas-chatbot.json` |
+
+Las capturas se toman **en las corridas que pasan**, no solo cuando algo falla.
+Playwright por defecto solo guarda imágenes ante un fallo —correcto para
+depurar—, pero eso deja la entrega de un ejercicio de interfaz sin una sola
+imagen cuando todo va bien. Un JSON con nombres de casos no demuestra que el
+chatbot respondiera; una captura de la conversación sí.
+
+Se capturan cuatro momentos:
+
+| Archivo | Qué prueba |
+|---|---|
+| `01-sitio-cargado.png` | El sitio de documentación renderizó su contenido |
+| `02-panel-cerrado.png` | El botón de cerrar colapsa el panel y deja el disparador accesible |
+| `02-panel-reabierto.png` | El panel se restaura con su compositor operativo |
+| `03-conversacion-con-respuesta.png` | "Hola" en el historial y la respuesta del bot en pantalla |
+
+Cada captura queda además adjunta al reporte HTML, junto al caso que la generó.
+
 ## Cómo ejecutarlas
 
 Desde `ejercicio-2-3-playwright/`:

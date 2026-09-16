@@ -6,7 +6,12 @@
  * output/ejercicio-3/metricas-chatbot.json para el Ejercicio 5.
  */
 import { test, expect } from '@playwright/test';
-import { WidgetChat, registrarMetrica, TIMEOUT_RESPUESTA_BOT_MS } from './widget-chat';
+import {
+  WidgetChat,
+  capturarEvidencia,
+  registrarMetrica,
+  TIMEOUT_RESPUESTA_BOT_MS,
+} from './widget-chat';
 
 const MENSAJE = 'Hola';
 
@@ -56,6 +61,10 @@ test.describe('Ejercicio 3 — Conversación con el bot', () => {
     // --- Tiempo de respuesta medido y dentro de un rango creíble ---
     expect(resultado.tiempoRespuestaMs).toBeGreaterThan(0);
     expect(resultado.tiempoRespuestaMs).toBeLessThan(TIMEOUT_RESPUESTA_BOT_MS);
+
+    // Evidencia visual de que la conversación ocurrió de verdad: es lo que
+    // pide el enunciado y lo que un JSON de resultados no puede demostrar.
+    await capturarEvidencia(page, '03-conversacion-con-respuesta', testInfo);
 
     // Queda en el reporte HTML como evidencia junto al JSON de métricas.
     await testInfo.attach('metrica-respuesta', {
