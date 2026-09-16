@@ -39,6 +39,12 @@ _SIN_TEMPERATURA = (
 )
 
 
+# Hasta cuánto se espera a un límite por minuto antes de darse por vencido.
+# Los límites de tokens por minuto se reponen en menos de 60 s; lo que pide
+# esperar más que esto es una cuota diaria, y ahí esperar no arregla nada.
+ESPERA_MAXIMA_S = 75.0
+
+
 def acepta_temperatura(modelo: str) -> bool:
     return not modelo.startswith(_SIN_TEMPERATURA)
 
@@ -221,16 +227,27 @@ class ClienteLLM:
             except Exception as exc:                      # noqa: BLE001
                 ultimo_error = exc
                 espera = segundos_de_espera(exc)
-
-                # Un límite de cuota que pide esperar minutos no se arregla
-                # reintentando en 1, 2 y 4 segundos: solo retrasa el fallo y
-                # gasta tres peticiones más contra la misma cuota. Se corta de
-                # inmediato con un diagnóstico que diga qué hacer.
                 agotado = intento == self.reintentos - 1
-                if agotado or (espera is not None and espera > 2 ** intento):
+
+                # Hay dos clases de límite y se tratan al revés:
+                #
+                #   - Por minuto: el proveedor pide segundos. Esperarlos
+                #     funciona, y es lo normal en una corrida larga —el juez
+                #     consume varios miles de tokens por turno y los límites
+                #     por minuto son estrechos—. Se espera lo que pide y se
+                #     reintenta.
+                #
+                #   - Cuota diaria: pide minutos u horas. Esperar ahí bloquearía
+                #     la corrida sin arreglar nada, así que se corta de
+                #     inmediato con un diagnóstico que diga qué hacer.
+                if espera is not None and espera <= ESPERA_MAXIMA_S and not agotado:
+                    time.sleep(espera + 1)               # +1s de margen
+                    continue
+
+                if agotado or (espera is not None and espera > ESPERA_MAXIMA_S):
                     raise ErrorLLM(
                         f"{self.proveedor}/{modelo} falló"
-                        + (f" tras {intento + 1} intento(s)" if not espera else "")
+                        + (f" tras {intento + 1} intento(s)" if espera is None else "")
                         + f": {exc}{_diagnostico(exc, self.proveedor, modelo)}"
                     ) from exc
                 time.sleep(2 ** intento)                  # 1s, 2s, 4s

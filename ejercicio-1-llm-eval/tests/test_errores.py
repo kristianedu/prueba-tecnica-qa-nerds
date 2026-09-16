@@ -67,3 +67,25 @@ def test_un_error_desconocido_no_inventa_diagnostico():
     equivocada: el mensaje original del proveedor se muestra igual.
     """
     assert _diagnostico(Exception("connection reset by peer"), "groq", "x") == ""
+
+
+# ------------------------------------- los dos tipos de límite se tratan al revés
+
+def test_el_limite_por_minuto_pide_una_espera_corta():
+    """
+    Regresión de un error propio: al arreglar los reintentos inútiles contra la
+    cuota diaria, se rompió el caso del límite por minuto, donde esperar los
+    segundos que pide el proveedor SÍ resuelve. Una corrida de 30 turnos roza
+    ese límite constantemente, porque el juez consume miles de tokens por turno.
+    """
+    from llm_client import ESPERA_MAXIMA_S
+    espera = segundos_de_espera(Exception(
+        "429 Rate limit reached on tokens per minute (TPM). Please try again in 7.2s"
+    ))
+    assert espera is not None and espera <= ESPERA_MAXIMA_S   # se espera y se reintenta
+
+
+def test_la_cuota_diaria_pide_una_espera_larga():
+    from llm_client import ESPERA_MAXIMA_S
+    espera = segundos_de_espera(Exception(CUOTA_DIARIA))
+    assert espera is not None and espera > ESPERA_MAXIMA_S    # se corta de inmediato
