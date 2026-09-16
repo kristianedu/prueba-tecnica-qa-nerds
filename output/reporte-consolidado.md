@@ -1,6 +1,6 @@
 # Reporte consolidado — Prueba Técnica QA
 
-Generado: `2026-09-16T01:58:41+00:00`
+Generado: `2026-09-16T02:16:56+00:00`
 
 ## Resumen global
 
@@ -11,8 +11,8 @@ Generado: `2026-09-16T01:58:41+00:00`
 | Casos en rojo | 0 |
 | Tasa de éxito | 100.0% |
 | Hallazgos detectados | 0 (0 críticos) |
-| Tiempo medio por caso de API | 500.5 ms |
-| Tiempo de respuesta del chatbot | 1019 ms |
+| Tiempo medio por caso de API | 520.9 ms |
+| Tiempo de respuesta del chatbot | 1611 ms |
 
 ## Ejercicio 1 — Evaluación conversacional
 
@@ -30,11 +30,11 @@ Generado: `2026-09-16T01:58:41+00:00`
 
 ## Ejercicio 2 — API
 
-**22/22 en verde** (0 en rojo, 0 omitidas) — 11.0 s en total, media de 500.5 ms por caso.
+**22/22 en verde** (0 en rojo, 0 omitidas) — 11.5 s en total, media de 520.9 ms por caso.
 
 ## Ejercicio 3 — Chatbot Web
 
-**7/7 en verde** (0 en rojo, 0 omitidas) — 13.4 s en total, media de 1912.0 ms por caso.
+**7/7 en verde** (0 en rojo, 0 omitidas) — 14.2 s en total, media de 2023.7 ms por caso.
 
 **Métricas del chatbot:**
 
@@ -48,14 +48,14 @@ Generado: `2026-09-16T01:58:41+00:00`
     "tipo": "panel inline (isla de Astro en el documento principal, no iframe)",
     "identidad_declarada": "You're chatting with an AI agent."
   },
-  "generado_utc": "2026-09-16T01:56:54.248Z",
+  "generado_utc": "2026-09-16T02:16:56.322Z",
   "metodologia": "tiempo_respuesta_ms va del clic en Enviar a la primera burbuja del bot con texto visible (time to first token): es la métrica principal, porque no depende de lo larga que sea la respuesta. tiempo_respuesta_completa_ms mide hasta que el streaming deja de crecer, a título informativo.",
   "resumen": {
     "total_interacciones": 2,
     "respuestas_recibidas": 2,
-    "tiempo_respuesta_ms_promedio": 1019,
-    "tiempo_respuesta_ms_min": 919,
-    "tiempo_respuesta_ms_max": 1118
+    "tiempo_respuesta_ms_promedio": 1611,
+    "tiempo_respuesta_ms_min": 1610,
+    "tiempo_respuesta_ms_max": 1612
   },
   "interacciones": [
     {
@@ -63,9 +63,9 @@ Generado: `2026-09-16T01:58:41+00:00`
       "caso": "envía \"Hola\", recibe respuesta y registra el tiempo",
       "mensaje_enviado": "Hola",
       "respuesta_recibida": true,
-      "tiempo_respuesta_ms": 1118,
-      "tiempo_respuesta_completa_ms": 2542,
-      "timestamp_utc": "2026-09-16T01:56:48.233Z",
+      "tiempo_respuesta_ms": 1610,
+      "tiempo_respuesta_completa_ms": 3032,
+      "timestamp_utc": "2026-09-16T02:16:49.562Z",
       "extracto_respuesta": "I'm here specifically for Botpress documentation questions. Ask me about Studio, the ADK, Webchat, the HTTP APIs, integrations, or Desk and I can help."
     },
     {
@@ -73,9 +73,9 @@ Generado: `2026-09-16T01:58:41+00:00`
       "caso": "el historial conserva la conversación tras cerrar y reabrir el panel",
       "mensaje_enviado": "Hola",
       "respuesta_recibida": true,
-      "tiempo_respuesta_ms": 919,
-      "tiempo_respuesta_completa_ms": 2342,
-      "timestamp_utc": "2026-09-16T01:56:51.887Z",
+      "tiempo_respuesta_ms": 1612,
+      "tiempo_respuesta_completa_ms": 2324,
+      "timestamp_utc": "2026-09-16T02:16:53.979Z",
       "extracto_respuesta": "I'm here specifically for Botpress documentation questions. Ask me about Studio, the ADK, Webchat, the HTTP APIs, integrations, or Desk and I can help."
     }
   ]

@@ -111,10 +111,11 @@ ejercicios en cada push y pull request.
 
 Dos decisiones que vale la pena señalar:
 
-- **Los jobs de pruebas llevan `continue-on-error`.** Sin eso, el primer fallo
-  aborta el pipeline y el reporte consolidado nunca se genera, justo cuando más
-  se necesita. Aquí siempre se produce, y un job final decide si el pipeline
-  pasa. El reporte se publica en el *Job Summary* de GitHub.
+- **El reporte se genera aunque algo falle**, gracias al `if: always()` del job
+  de consolidación, y se publica en el *Job Summary* de GitHub. Lo que los jobs
+  de pruebas **no** llevan es `continue-on-error`: lo tuvieron, y con esa
+  bandera un job en rojo no tumbaba la ejecución, así que el pipeline se
+  reportaba en verde con el Ejercicio 1 fallando.
 - **El job del LLM corre primero las pruebas del evaluador**, y después una
   contraprueba: con el fixture defectuoso los 5 escenarios *tienen* que fallar.
   Si pasan, el evaluador dejó de detectar y el pipeline se entera.

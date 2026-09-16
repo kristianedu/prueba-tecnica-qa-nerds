@@ -139,7 +139,7 @@
   "analisis": "Evaluación PARCIAL: el juez no se ejecutó (proveedor 'mock'), así que coherence_score no se midió.",
   "hallazgos": [],
   "ejecucion": {
-    "fecha_utc": "2026-09-16T01:58:10+00:00",
+    "fecha_utc": "2026-09-16T02:16:28+00:00",
     "proveedor": "mock",
     "modelo_asistente": "claude-haiku-4-5",
     "modelo_juez": "claude-haiku-4-5",

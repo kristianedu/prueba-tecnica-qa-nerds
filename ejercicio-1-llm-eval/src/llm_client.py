@@ -194,6 +194,7 @@ class ClienteLLM:
             max_tokens=max_tokens,
             esquema=esquema,
             contexto=contexto if self.proveedor == "mock" else None,
+            fixture=str(self._ruta_fixture()) if self.proveedor == "mock" else None,
         )
         if (guardado := self.cache.leer(clave)) is not None:
             return RespuestaLLM(**{**guardado, "desde_cache": True})
@@ -331,15 +332,17 @@ class ClienteLLM:
                 f"{clave} turno={turno}"
             ) from exc
 
-    def _cargar_fixture(self) -> dict[str, Any]:
-        if self._mock_cargado is not None:
-            return self._mock_cargado
-        import yaml
-        ruta = Path(
+    def _ruta_fixture(self) -> Path:
+        return Path(
             self._fixture_mock
             or os.getenv("MOCK_FIXTURE")
             or Path(__file__).resolve().parents[1] / "fixtures" / "asistente-sano.yaml"
-        )
+        ).resolve()
+
+    def _cargar_fixture(self) -> dict[str, Any]:
+        if self._mock_cargado is not None:
+            return self._mock_cargado
+        ruta = self._ruta_fixture()
         if not ruta.exists():
             raise ErrorLLM(f"No existe el fixture mock: {ruta}")
         self._mock_cargado = _cargar_fixture_con_herencia(ruta)

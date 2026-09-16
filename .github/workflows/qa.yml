@@ -8,10 +8,14 @@
 # rápida y barata, así que fallar ahí primero ahorra minutos de runner), pero en
 # una prueba técnica se sigue la especificación y se documenta la observación.
 #
-# Los tres jobs de pruebas llevan `continue-on-error` a propósito: sin eso, el
-# primer fallo aborta el pipeline y el reporte consolidado nunca se genera —
-# justo cuando más se necesita. Aquí siempre se produce, y el job final es el
-# que decide si el pipeline pasa o no.
+# El job de consolidación lleva `if: always()`, así que el reporte se genera
+# aunque alguno de los tres jobs de pruebas haya fallado — que es justo cuando
+# más se necesita.
+#
+# Lo que NO llevan los jobs de pruebas es `continue-on-error`. Lo tuvieron, y
+# fue un error: con esa bandera un job en rojo no tumba la ejecución, así que el
+# pipeline se reportaba en verde con el Ejercicio 1 fallando. `if: always()` ya
+# garantiza el reporte sin enmascarar nada.
 
 name: QA — Prueba Técnica
 
@@ -30,7 +34,6 @@ jobs:
   web:
     name: Ejercicio 3 — Chatbot Web
     runs-on: ubuntu-latest
-    continue-on-error: true
     defaults:
       run:
         working-directory: ejercicio-2-3-playwright
@@ -64,7 +67,6 @@ jobs:
   api:
     name: Ejercicio 2 — API
     runs-on: ubuntu-latest
-    continue-on-error: true
     defaults:
       run:
         working-directory: ejercicio-2-3-playwright
@@ -100,7 +102,6 @@ jobs:
   llm:
     name: Ejercicio 1 — Evaluación LLM
     runs-on: ubuntu-latest
-    continue-on-error: true
     defaults:
       run:
         working-directory: ejercicio-1-llm-eval
@@ -206,7 +207,8 @@ jobs:
           retention-days: 30
 
       - name: Decidir el resultado del pipeline
-        # Los jobs de pruebas no cortan el pipeline (continue-on-error) para que
-        # el reporte siempre se genere. La decisión final se toma aquí, con el
-        # consolidado ya en la mano.
+        # Segunda red de seguridad, con el consolidado ya en la mano: si un
+        # job de pruebas falló, la ejecución ya está en rojo por sí sola, pero
+        # esto además captura casos en rojo o hallazgos críticos que hubieran
+        # quedado registrados sin tumbar su job.
         run: python ejercicio-5-reporte/consolidar.py --entrada output --salida output --estricto
