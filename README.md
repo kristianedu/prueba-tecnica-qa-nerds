@@ -34,6 +34,27 @@ siguen disponibles aunque expiren los de Actions. Los reportes HTML de Playwrigh
 son archivos autocontenidos: GitHub los muestra como código fuente, pero al
 descargarlos abren directamente en el navegador.
 
+## Para quien revisa: tres formas de comprobarlo
+
+**Sin instalar nada.** La
+[última ejecución del pipeline](https://github.com/kristianedu/prueba-tecnica-qa-nerds/actions/workflows/qa.yml)
+trae el reporte consolidado en su resumen y los reportes HTML como artefactos.
+Las conversaciones evaluadas están en [`output/ejercicio-1/`](output/ejercicio-1/)
+y las capturas del chatbot en [`output/ejercicio-3/capturas/`](output/ejercicio-3/capturas/).
+Si el último run está en rojo por *"cuota diaria de tokens agotada"*, es el
+límite del tier gratuito de Groq —compartido entre CI y uso local—, no un fallo
+de la suite: se relanza pasadas las 00:00 UTC.
+
+**Con clave propia, el pipeline al completo.** Hacer un *fork*, guardar una clave
+gratuita de https://console.groq.com como secret `GROQ_API_KEY` y, en *Actions*,
+pulsar **Run workflow**. Con cuota nueva corre los cinco ejercicios contra los
+sistemas reales.
+
+**En local.** Seguir *Puesta en marcha*. Todo salvo la evaluación real del
+Ejercicio 1 corre sin credenciales. Verificado desde un clon limpio siguiendo
+solo este README: 91 pruebas del evaluador, 22 de API y 7 del chatbot en verde,
+y las seis conversaciones de cada escenario legibles con `--ver N`.
+
 ## Estructura
 
 ```
