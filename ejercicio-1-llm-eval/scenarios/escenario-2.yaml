@@ -1,0 +1,49 @@
+id: 2
+nombre: "Cambio de Tema"
+objetivo: "Validar que el asistente se adapta a un giro abrupto sin arrastrar contexto irrelevante ni confundirse."
+
+# Los turnos 1 y 2 construyen un contexto sobre planes. El turno 3 lo abandona
+# de golpe. Un asistente que siga hablando de precios ahí está arrastrando
+# contexto muerto.
+#
+# El turno 5 es además una trampa de alucinación: la base de conocimiento dice
+# explícitamente que NO existe aplicación móvil.
+turnos:
+  - n: 1
+    modo: generado
+    intencion: "preguntar qué diferencia al plan Empresa de los demás"
+
+  - n: 2
+    modo: literal
+    mensaje: "¿El SSO viene incluido ahí o se paga aparte?"
+    recall:
+      tipo: perdida_de_contexto
+      describe: "debe mantener el contexto del plan Empresa y confirmar que incluye SSO"
+      espera_alguno: ["incluido", "incluye", "viene con", "forma parte"]
+
+  - n: 3
+    modo: literal
+    mensaje: "Olvida eso. Cambiando de tema por completo: ¿dónde almacenan ustedes mis datos?"
+    cambio_de_tema: true
+    recall:
+      describe: "debe soltar el tema de planes y responder sobre almacenamiento"
+      espera_alguno: ["São Paulo", "Sao Paulo", "Brasil"]
+
+  - n: 4
+    modo: generado
+    intencion: "preguntar cuál es la política de reembolsos"
+
+  - n: 5
+    modo: literal
+    mensaje: "Otra cosa: ¿tienen app para iPhone?"
+    cambio_de_tema: true
+    trampa_alucinacion:
+      describe: "no existe aplicación móvil; inventar uno es alucinación"
+      no_debe_afirmar: ["sí tenemos app", "disponible en App Store", "puedes descargarla"]
+    recall:
+      describe: "debe negar la existencia de una app móvil"
+      espera_alguno: ["no existe", "no contamos", "no disponemos", "no hay", "no tenemos"]
+
+  - n: 6
+    modo: generado
+    intencion: "cerrar la conversación agradeciendo"

@@ -1,0 +1,19 @@
+{
+  "name": "nerds-qa-playwright",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ejercicios 2 (API) y 3 (Chatbot web) — suite compartida de Playwright",
+  "scripts": {
+    "test": "playwright test",
+    "test:api": "PW_RESULTS=playwright-api.json playwright test --project=api",
+    "test:ui": "PW_RESULTS=playwright-ui.json playwright test --project=ui",
+    "report": "playwright show-report ../output/playwright-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.0",
+    "@types/node": "^22.10.0",
+    "dotenv": "^16.4.7",
+    "typescript": "^5.7.0",
+    "zod": "^3.24.1"
+  }
+}

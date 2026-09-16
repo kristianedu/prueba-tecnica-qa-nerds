@@ -1,0 +1,41 @@
+id: 4
+nombre: "Memoria Conversacional"
+objetivo: "Validar la retención de contexto a lo largo de la conversación."
+
+# Se inyectan dos datos en turnos separados (1 y 3), se mete distancia con dos
+# turnos de relleno temático (4 y 5) y en el 6 se sondea si ambos sobrevivieron.
+#
+# Esta es la medición más limpia de todo el ejercicio: el check es puramente
+# determinístico, sin juez de por medio.
+turnos:
+  - n: 1
+    modo: literal
+    mensaje: "Hola, me llamo Carlos y trabajo en una agencia de diseño."
+    inyecta_hechos:
+      nombre_usuario: "Carlos"
+      rubro_usuario: "agencia de diseño"
+
+  - n: 2
+    modo: generado
+    intencion: "preguntar qué plan le conviene a un equipo pequeño"
+
+  - n: 3
+    modo: literal
+    mensaje: "Somos 12 personas en el equipo."
+    inyecta_hechos:
+      tamano_equipo: "12"
+
+  - n: 4
+    modo: generado
+    intencion: "preguntar por la política de reembolsos"
+
+  - n: 5
+    modo: generado
+    intencion: "preguntar en qué horario atiende el soporte"
+
+  - n: 6
+    modo: literal
+    mensaje: "Antes de decidir: ¿recuerdas cómo me llamo y cuántos somos en el equipo?"
+    verifica_recall:
+      nombre_usuario: ["Carlos"]
+      tamano_equipo: ["12", "doce"]

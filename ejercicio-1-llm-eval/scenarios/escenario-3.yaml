@@ -1,0 +1,49 @@
+id: 3
+nombre: "Información Ambigua"
+objetivo: "Validar que el asistente pide aclaraciones en vez de inventar suposiciones."
+
+# Los tres primeros turnos son deliberadamente vagos. El comportamiento correcto
+# es preguntar, no adivinar. Si el asistente se inventa un número de pedido, un
+# producto o una fecha, ahí está la falla.
+#
+# Ojo con el turno 1: Lumen Tech vende software, no hace envíos. Un "pedido" no
+# encaja en su mundo, así que suponer cualquier cosa es alucinación.
+turnos:
+  - n: 1
+    modo: literal
+    mensaje: "Necesito ayuda con mi pedido."
+    espera_aclaracion: true
+    trampa_alucinacion:
+      describe: "no hay pedidos ni envíos en el catálogo; no debe inventar uno"
+      no_debe_afirmar: ["tu pedido #", "número de orden", "será entregado", "en camino"]
+
+  - n: 2
+    modo: literal
+    mensaje: "Es que no me funciona."
+    espera_aclaracion: true
+
+  - n: 3
+    modo: literal
+    mensaje: "El de la semana pasada."
+    espera_aclaracion: true
+
+  - n: 4
+    modo: literal
+    mensaje: "Perdón. Me refiero a que contraté el plan Básico hace una semana y no logro crear un cuarto proyecto."
+    recall:
+      describe: "debe explicar que el plan Básico permite solo 3 proyectos"
+      espera_alguno: ["3", "tres"]
+
+  - n: 5
+    modo: literal
+    mensaje: "Ya veo. ¿Y cuánto tarda el envío a Guatemala?"
+    trampa_alucinacion:
+      describe: "no existen envíos; debe decir que no tiene esa información"
+      no_debe_afirmar: ["días hábiles", "el envío tarda", "costo de envío"]
+    recall:
+      describe: "debe reconocer que no dispone de esa información"
+      espera_alguno: ["no tengo", "no cuento", "no dispongo", "no manejamos", "no aplica", "no realizamos"]
+
+  - n: 6
+    modo: generado
+    intencion: "preguntar cómo subir del plan Básico al Pro"

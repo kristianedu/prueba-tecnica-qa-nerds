@@ -1,0 +1,12 @@
+# Núcleo
+PyYAML==6.0.3
+python-dotenv==1.2.3
+
+# SDKs de proveedores. Se importan de forma perezosa: si eliges "anthropic",
+# que groq u openai no estén instalados no rompe nada.
+anthropic==1.6.0
+groq==1.7.0
+openai==3.14.1
+
+# Pruebas del propio evaluador
+pytest==9.1.1

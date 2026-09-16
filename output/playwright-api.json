@@ -1,0 +1,1026 @@
+{
+  "config": {
+    "argv": [
+      "/opt/homebrew/Cellar/node@20/20.20.2/bin/node",
+      "/Users/cristian/Documents/NERDS/ejercicio-2-3-playwright/node_modules/.bin/playwright",
+      "test",
+      "--project=api"
+    ],
+    "configFile": "/Users/cristian/Documents/NERDS/ejercicio-2-3-playwright/playwright.config.ts",
+    "rootDir": "/Users/cristian/Documents/NERDS/ejercicio-2-3-playwright/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/cristian/Documents/NERDS/ejercicio-2-3-playwright/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "api",
+        "name": "api",
+        "testDir": "/Users/cristian/Documents/NERDS/ejercicio-2-3-playwright/tests/api",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 90000
+      },
+      {
+        "outputDir": "/Users/cristian/Documents/NERDS/ejercicio-2-3-playwright/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "ui",
+        "name": "ui",
+        "testDir": "/Users/cristian/Documents/NERDS/ejercicio-2-3-playwright/tests/ui",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "html",
+        {
+          "outputFolder": "/Users/cristian/Documents/NERDS/output/playwright-report",
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "/Users/cristian/Documents/NERDS/output/playwright-api.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "api/00-health.spec.ts",
+      "file": "api/00-health.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Health check",
+          "file": "api/00-health.spec.ts",
+          "line": 14,
+          "column": 6,
+          "specs": [
+            {
+              "title": "el servicio responde 200 y se reporta OPERATIONAL",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 808,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "  health check respondió en 781 ms\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:41:57.460Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dd947566bc0d35587abc-8bd6229451975c2598cd",
+              "file": "api/00-health.spec.ts",
+              "line": 15,
+              "column": 7
+            },
+            {
+              "title": "responde con JSON, no con HTML de error",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 396,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:41:58.284Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dd947566bc0d35587abc-58b8aa01b9e68682a5d5",
+              "file": "api/00-health.spec.ts",
+              "line": 32,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "api/01-auth.spec.ts",
+      "file": "api/01-auth.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Registro",
+          "file": "api/01-auth.spec.ts",
+          "line": 19,
+          "column": 6,
+          "specs": [
+            {
+              "title": "registra un usuario nuevo y devuelve 201 con sus datos",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 515,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:41:58.687Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "791b3c4e0869e77b2651-271e7943f258dfd3bdc0",
+              "file": "api/01-auth.spec.ts",
+              "line": 20,
+              "column": 7
+            },
+            {
+              "title": "rechaza un email ya registrado",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 772,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:41:59.206Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "791b3c4e0869e77b2651-397713eba031ef1235b2",
+              "file": "api/01-auth.spec.ts",
+              "line": 36,
+              "column": 7
+            },
+            {
+              "title": "rechaza un registro sin campos obligatorios",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 390,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:41:59.980Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "791b3c4e0869e77b2651-ed85025d76c765861ea6",
+              "file": "api/01-auth.spec.ts",
+              "line": 47,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Login",
+          "file": "api/01-auth.spec.ts",
+          "line": 56,
+          "column": 6,
+          "specs": [
+            {
+              "title": "con credenciales válidas devuelve 200 y un JWT",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 861,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:42:00.375Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "791b3c4e0869e77b2651-78b72b48d66a7371b25f",
+              "file": "api/01-auth.spec.ts",
+              "line": 57,
+              "column": 7
+            },
+            {
+              "title": "con contraseña incorrecta devuelve 401 e Invalid Credentials",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 810,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:42:01.240Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "791b3c4e0869e77b2651-02885a6ad98bea4931c0",
+              "file": "api/01-auth.spec.ts",
+              "line": 81,
+              "column": 7
+            },
+            {
+              "title": "con un email inexistente también devuelve 401, sin revelar si existe",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 414,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:42:02.053Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "791b3c4e0869e77b2651-69543aa26ff6952287df",
+              "file": "api/01-auth.spec.ts",
+              "line": 94,
+              "column": 7
+            },
+            {
+              "title": "rechaza un login sin contraseña",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 329,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:42:02.470Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "791b3c4e0869e77b2651-56c0317a1ff23a198843",
+              "file": "api/01-auth.spec.ts",
+              "line": 109,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "api/02-goals.spec.ts",
+      "file": "api/02-goals.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Ciclo de vida de los goals",
+          "file": "api/02-goals.spec.ts",
+          "line": 39,
+          "column": 15,
+          "specs": [
+            {
+              "title": "crea dos goals distintos con 201 y datos íntegros",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/Users/cristian/Documents/NERDS/ejercicio-2-3-playwright/tests/api/02-goals.spec.ts",
+                        "line": 39,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 576,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:42:03.009Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/Users/cristian/Documents/NERDS/ejercicio-2-3-playwright/tests/api/02-goals.spec.ts",
+                            "line": 39,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5defb10f7ecc37c74390-7dd298c820ead99095a0",
+              "file": "api/02-goals.spec.ts",
+              "line": 42,
+              "column": 7
+            },
+            {
+              "title": "consulta un goal por su ID y los datos coinciden con los creados",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/Users/cristian/Documents/NERDS/ejercicio-2-3-playwright/tests/api/02-goals.spec.ts",
+                        "line": 39,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 361,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:42:04.654Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/Users/cristian/Documents/NERDS/ejercicio-2-3-playwright/tests/api/02-goals.spec.ts",
+                            "line": 39,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5defb10f7ecc37c74390-cf6699ca11a36c08e077",
+              "file": "api/02-goals.spec.ts",
+              "line": 71,
+              "column": 7
+            },
+            {
+              "title": "el listado incluye los dos goals creados y su cantidad es correcta",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/Users/cristian/Documents/NERDS/ejercicio-2-3-playwright/tests/api/02-goals.spec.ts",
+                        "line": 39,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 415,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:42:05.019Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/Users/cristian/Documents/NERDS/ejercicio-2-3-playwright/tests/api/02-goals.spec.ts",
+                            "line": 39,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5defb10f7ecc37c74390-1fd4738e4cbc06307ecc",
+              "file": "api/02-goals.spec.ts",
+              "line": 87,
+              "column": 7
+            },
+            {
+              "title": "elimina un goal y deja de existir después",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/Users/cristian/Documents/NERDS/ejercicio-2-3-playwright/tests/api/02-goals.spec.ts",
+                        "line": 39,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 912,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:42:05.437Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/Users/cristian/Documents/NERDS/ejercicio-2-3-playwright/tests/api/02-goals.spec.ts",
+                            "line": 39,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5defb10f7ecc37c74390-a48a7d36ecdfa359d0bd",
+              "file": "api/02-goals.spec.ts",
+              "line": 111,
+              "column": 7
+            },
+            {
+              "title": "borrar dos veces el mismo goal devuelve 404",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/Users/cristian/Documents/NERDS/ejercicio-2-3-playwright/tests/api/02-goals.spec.ts",
+                        "line": 39,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 342,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:42:06.352Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/Users/cristian/Documents/NERDS/ejercicio-2-3-playwright/tests/api/02-goals.spec.ts",
+                            "line": 39,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5defb10f7ecc37c74390-49f9dff4d838c95cb808",
+              "file": "api/02-goals.spec.ts",
+              "line": 130,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Validaciones al crear",
+          "file": "api/02-goals.spec.ts",
+          "line": 136,
+          "column": 6,
+          "specs": [
+            {
+              "title": "rechaza un goal sin título ni descripción",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 327,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:42:06.698Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5defb10f7ecc37c74390-c5926dc741f22591a685",
+              "file": "api/02-goals.spec.ts",
+              "line": 137,
+              "column": 7
+            },
+            {
+              "title": "rechaza un goal sin título",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 352,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:42:07.029Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5defb10f7ecc37c74390-42c5c0d47394e15b40d4",
+              "file": "api/02-goals.spec.ts",
+              "line": 146,
+              "column": 7
+            },
+            {
+              "title": "aplica valores por defecto de status y priority",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 604,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:42:07.384Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5defb10f7ecc37c74390-528fd95ad6e6b8cc0893",
+              "file": "api/02-goals.spec.ts",
+              "line": 154,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Consultas inexistentes",
+          "file": "api/02-goals.spec.ts",
+          "line": 168,
+          "column": 6,
+          "specs": [
+            {
+              "title": "un ID válido pero ausente devuelve 404",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 361,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:42:07.991Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5defb10f7ecc37c74390-ef4130143a7e7298f2fd",
+              "file": "api/02-goals.spec.ts",
+              "line": 169,
+              "column": 7
+            },
+            {
+              "title": "un ID malformado también devuelve 404 y no un 500",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 321,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:42:08.356Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5defb10f7ecc37c74390-2b97afd03cb9df8c2be1",
+              "file": "api/02-goals.spec.ts",
+              "line": 177,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Autorización",
+          "file": "api/02-goals.spec.ts",
+          "line": 187,
+          "column": 6,
+          "specs": [
+            {
+              "title": "sin token devuelve 401",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 396,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:42:08.681Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5defb10f7ecc37c74390-54600307d854951f1267",
+              "file": "api/02-goals.spec.ts",
+              "line": 188,
+              "column": 7
+            },
+            {
+              "title": "con un token inválido devuelve 401",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 401,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:42:09.081Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5defb10f7ecc37c74390-4cf9c1e773829e929a8a",
+              "file": "api/02-goals.spec.ts",
+              "line": 196,
+              "column": 7
+            },
+            {
+              "title": "no se puede crear un goal sin autenticación",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 322,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T01:42:09.487Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5defb10f7ecc37c74390-6d551224f73f8d703714",
+              "file": "api/02-goals.spec.ts",
+              "line": 208,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-16T01:41:57.233Z",
+    "duration": 12589.448999999999,
+    "expected": 22,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

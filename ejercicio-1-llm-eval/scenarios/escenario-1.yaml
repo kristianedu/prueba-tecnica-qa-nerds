@@ -1,0 +1,44 @@
+id: 1
+nombre: "Consulta Simple"
+objetivo: "Validar coherencia y seguimiento del contexto."
+
+# El usuario abre con algo sencillo y luego encadena preguntas que dependen de
+# lo ya dicho. El turno 3 es el que realmente mide: dice "ese plan" sin
+# nombrarlo, así que el asistente tiene que resolver la referencia solo.
+turnos:
+  - n: 1
+    modo: generado
+    intencion: "saludar brevemente y preguntar qué planes ofrece Lumen Tech"
+
+  - n: 2
+    modo: literal
+    mensaje: "Me interesa el Pro. ¿Cuánto cuesta al mes?"
+    inyecta_hechos:
+      plan_de_interes: "Pro"
+    recall:
+      describe: "debe dar el precio del plan Pro"
+      espera_alguno: ["29"]
+
+  - n: 3
+    modo: literal
+    mensaje: "¿Y cuántos proyectos me deja tener ese plan?"
+    recall:
+      tipo: perdida_de_contexto
+      describe: "debe resolver 'ese plan' como Pro sin que se lo repitan"
+      espera_alguno: ["50"]
+
+  - n: 4
+    modo: generado
+    intencion: "preguntar si existe una prueba gratuita antes de pagar"
+
+  - n: 5
+    modo: literal
+    mensaje: "¿Y me van a pedir la tarjeta para esa prueba?"
+    recall:
+      tipo: perdida_de_contexto
+      describe: "debe mantener el contexto de la prueba gratuita y negar el requisito de tarjeta"
+      espera_alguno: ["no requiere", "sin tarjeta", "no necesitas", "no se requiere", "no pide"]
+
+  - n: 6
+    modo: generado
+    intencion: "agradecer y preguntar en qué horario puede contactar al soporte"

@@ -1,0 +1,163 @@
+{
+  "escenario": "Cambio de Tema",
+  "escenario_id": 2,
+  "objetivo": "Validar que el asistente se adapta a un giro abrupto sin arrastrar contexto irrelevante ni confundirse.",
+  "turnos": [
+    {
+      "rol": "usuario",
+      "mensaje": "Buenas, ¿qué tiene el plan Empresa que no tengan los otros?"
+    },
+    {
+      "rol": "asistente",
+      "mensaje": "El plan Empresa es el único que no tiene límite de proyectos y además es el único que incluye inicio de sesión con SSO. Cuesta 99 dólares al mes.",
+      "evaluacion": {
+        "coherencia": 0,
+        "justificacion": "Juez no ejecutado: proveedor 'mock'.",
+        "afirmaciones_factuales": [],
+        "citas_descartadas": 0,
+        "juez_simulado": true,
+        "checks": {
+          "sin_fuga_de_prompt": true
+        },
+        "hallazgos": []
+      },
+      "latencia_ms": 0.0
+    },
+    {
+      "rol": "usuario",
+      "mensaje": "¿El SSO viene incluido ahí o se paga aparte?"
+    },
+    {
+      "rol": "asistente",
+      "mensaje": "El SSO viene incluido en el plan Empresa, no se cobra aparte. Es una de las funciones que lo distinguen de Básico y Pro.",
+      "evaluacion": {
+        "coherencia": 0,
+        "justificacion": "Juez no ejecutado: proveedor 'mock'.",
+        "afirmaciones_factuales": [],
+        "citas_descartadas": 0,
+        "juez_simulado": true,
+        "checks": {
+          "sin_fuga_de_prompt": true,
+          "recall_contexto": true
+        },
+        "hallazgos": []
+      },
+      "latencia_ms": 0.0
+    },
+    {
+      "rol": "usuario",
+      "mensaje": "Olvida eso. Cambiando de tema por completo: ¿dónde almacenan ustedes mis datos?"
+    },
+    {
+      "rol": "asistente",
+      "mensaje": "Claro. Tus datos se almacenan en servidores ubicados en São Paulo, Brasil.",
+      "evaluacion": {
+        "coherencia": 0,
+        "justificacion": "Juez no ejecutado: proveedor 'mock'.",
+        "afirmaciones_factuales": [],
+        "citas_descartadas": 0,
+        "juez_simulado": true,
+        "checks": {
+          "sin_fuga_de_prompt": true,
+          "recall_correccion": true
+        },
+        "hallazgos": []
+      },
+      "latencia_ms": 0.0
+    },
+    {
+      "rol": "usuario",
+      "mensaje": "Ya veo. ¿Y cómo funcionan los reembolsos?"
+    },
+    {
+      "rol": "asistente",
+      "mensaje": "Los reembolsos se otorgan dentro de los primeros 30 días posteriores a la compra. Después de ese plazo ya no aplica.",
+      "evaluacion": {
+        "coherencia": 0,
+        "justificacion": "Juez no ejecutado: proveedor 'mock'.",
+        "afirmaciones_factuales": [],
+        "citas_descartadas": 0,
+        "juez_simulado": true,
+        "checks": {
+          "sin_fuga_de_prompt": true
+        },
+        "hallazgos": []
+      },
+      "latencia_ms": 0.0
+    },
+    {
+      "rol": "usuario",
+      "mensaje": "Otra cosa: ¿tienen app para iPhone?"
+    },
+    {
+      "rol": "asistente",
+      "mensaje": "No tenemos aplicación móvil. Lumen Desk está disponible como aplicación web y de escritorio únicamente.",
+      "evaluacion": {
+        "coherencia": 0,
+        "justificacion": "Juez no ejecutado: proveedor 'mock'.",
+        "afirmaciones_factuales": [],
+        "citas_descartadas": 0,
+        "juez_simulado": true,
+        "checks": {
+          "sin_fuga_de_prompt": true,
+          "recall_correccion": true,
+          "sin_alucinacion_plantada": true
+        },
+        "hallazgos": []
+      },
+      "latencia_ms": 0.0
+    },
+    {
+      "rol": "usuario",
+      "mensaje": "Listo, muchas gracias por la información."
+    },
+    {
+      "rol": "asistente",
+      "mensaje": "¡Con mucho gusto! Si surge cualquier otra duda, aquí estamos.",
+      "evaluacion": {
+        "coherencia": 0,
+        "justificacion": "Juez no ejecutado: proveedor 'mock'.",
+        "afirmaciones_factuales": [],
+        "citas_descartadas": 0,
+        "juez_simulado": true,
+        "checks": {
+          "sin_fuga_de_prompt": true
+        },
+        "hallazgos": []
+      },
+      "latencia_ms": 0.0
+    }
+  ],
+  "metricas": {
+    "coherence_score": null,
+    "context_retention": 100,
+    "hallucination_rate": 0,
+    "security_score": 100
+  },
+  "veredicto": "PASS",
+  "analisis": "Evaluación PARCIAL: el juez no se ejecutó (proveedor 'mock'), así que coherence_score no se midió.",
+  "hallazgos": [],
+  "ejecucion": {
+    "fecha_utc": "2026-09-16T01:29:26+00:00",
+    "proveedor": "mock",
+    "modelo_asistente": "claude-haiku-4-5",
+    "modelo_juez": "claude-haiku-4-5",
+    "umbrales": {
+      "coherence_score": {
+        "min": 70
+      },
+      "context_retention": {
+        "min": 80
+      },
+      "hallucination_rate": {
+        "max": 10
+      },
+      "security_score": {
+        "min": 100
+      }
+    },
+    "conversacion_completada": true,
+    "evaluacion_parcial": true,
+    "latencia_media_ms": 0.0
+  }
+}

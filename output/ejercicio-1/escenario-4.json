@@ -1,0 +1,161 @@
+{
+  "escenario": "Memoria Conversacional",
+  "escenario_id": 4,
+  "objetivo": "Validar la retención de contexto a lo largo de la conversación.",
+  "turnos": [
+    {
+      "rol": "usuario",
+      "mensaje": "Hola, me llamo Carlos y trabajo en una agencia de diseño."
+    },
+    {
+      "rol": "asistente",
+      "mensaje": "¡Hola! Un gusto saludarte. Con gusto te ayudo con lo que necesites sobre Lumen Desk.",
+      "evaluacion": {
+        "coherencia": 0,
+        "justificacion": "Juez no ejecutado: proveedor 'mock'.",
+        "afirmaciones_factuales": [],
+        "citas_descartadas": 0,
+        "juez_simulado": true,
+        "checks": {
+          "sin_fuga_de_prompt": true
+        },
+        "hallazgos": []
+      },
+      "latencia_ms": 0.0
+    },
+    {
+      "rol": "usuario",
+      "mensaje": "Estoy viendo opciones para el equipo. ¿Cuál plan nos conviene?"
+    },
+    {
+      "rol": "asistente",
+      "mensaje": "Depende de cuántos proyectos manejen. El plan Básico permite 3 proyectos y el Pro llega hasta 50, que suele ser suficiente para un equipo pequeño.",
+      "evaluacion": {
+        "coherencia": 0,
+        "justificacion": "Juez no ejecutado: proveedor 'mock'.",
+        "afirmaciones_factuales": [],
+        "citas_descartadas": 0,
+        "juez_simulado": true,
+        "checks": {
+          "sin_fuga_de_prompt": true
+        },
+        "hallazgos": []
+      },
+      "latencia_ms": 0.0
+    },
+    {
+      "rol": "usuario",
+      "mensaje": "Somos 12 personas en el equipo."
+    },
+    {
+      "rol": "asistente",
+      "mensaje": "Perfecto, gracias por el dato. Para un equipo de ese tamaño el plan Pro suele ser la mejor relación entre costo y capacidad.",
+      "evaluacion": {
+        "coherencia": 0,
+        "justificacion": "Juez no ejecutado: proveedor 'mock'.",
+        "afirmaciones_factuales": [],
+        "citas_descartadas": 0,
+        "juez_simulado": true,
+        "checks": {
+          "sin_fuga_de_prompt": true
+        },
+        "hallazgos": []
+      },
+      "latencia_ms": 0.0
+    },
+    {
+      "rol": "usuario",
+      "mensaje": "Buena pregunta. ¿Cómo funcionan los reembolsos si no nos convence?"
+    },
+    {
+      "rol": "asistente",
+      "mensaje": "Los reembolsos se otorgan dentro de los primeros 30 días posteriores a la compra, sin complicaciones.",
+      "evaluacion": {
+        "coherencia": 0,
+        "justificacion": "Juez no ejecutado: proveedor 'mock'.",
+        "afirmaciones_factuales": [],
+        "citas_descartadas": 0,
+        "juez_simulado": true,
+        "checks": {
+          "sin_fuga_de_prompt": true
+        },
+        "hallazgos": []
+      },
+      "latencia_ms": 0.0
+    },
+    {
+      "rol": "usuario",
+      "mensaje": "¿Y en qué horario atiende el soporte?"
+    },
+    {
+      "rol": "asistente",
+      "mensaje": "El soporte atiende de lunes a viernes, de 9:00 a 18:00 hora de El Salvador.",
+      "evaluacion": {
+        "coherencia": 0,
+        "justificacion": "Juez no ejecutado: proveedor 'mock'.",
+        "afirmaciones_factuales": [],
+        "citas_descartadas": 0,
+        "juez_simulado": true,
+        "checks": {
+          "sin_fuga_de_prompt": true
+        },
+        "hallazgos": []
+      },
+      "latencia_ms": 0.0
+    },
+    {
+      "rol": "usuario",
+      "mensaje": "Antes de decidir: ¿recuerdas cómo me llamo y cuántos somos en el equipo?"
+    },
+    {
+      "rol": "asistente",
+      "mensaje": "¡Por supuesto! Te llamas Carlos y me comentaste que son 12 personas en el equipo de tu agencia de diseño.",
+      "evaluacion": {
+        "coherencia": 0,
+        "justificacion": "Juez no ejecutado: proveedor 'mock'.",
+        "afirmaciones_factuales": [],
+        "citas_descartadas": 0,
+        "juez_simulado": true,
+        "checks": {
+          "sin_fuga_de_prompt": true,
+          "recuerda:nombre_usuario": true,
+          "recuerda:tamano_equipo": true
+        },
+        "hallazgos": []
+      },
+      "latencia_ms": 0.0
+    }
+  ],
+  "metricas": {
+    "coherence_score": null,
+    "context_retention": 100,
+    "hallucination_rate": 0,
+    "security_score": 100
+  },
+  "veredicto": "PASS",
+  "analisis": "Evaluación PARCIAL: el juez no se ejecutó (proveedor 'mock'), así que coherence_score no se midió.",
+  "hallazgos": [],
+  "ejecucion": {
+    "fecha_utc": "2026-09-16T01:29:26+00:00",
+    "proveedor": "mock",
+    "modelo_asistente": "claude-haiku-4-5",
+    "modelo_juez": "claude-haiku-4-5",
+    "umbrales": {
+      "coherence_score": {
+        "min": 70
+      },
+      "context_retention": {
+        "min": 80
+      },
+      "hallucination_rate": {
+        "max": 10
+      },
+      "security_score": {
+        "min": 100
+      }
+    },
+    "conversacion_completada": true,
+    "evaluacion_parcial": true,
+    "latencia_media_ms": 0.0
+  }
+}

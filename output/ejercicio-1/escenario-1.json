@@ -1,0 +1,162 @@
+{
+  "escenario": "Consulta Simple",
+  "escenario_id": 1,
+  "objetivo": "Validar coherencia y seguimiento del contexto.",
+  "turnos": [
+    {
+      "rol": "usuario",
+      "mensaje": "Hola, buenas. ¿Qué planes manejan?"
+    },
+    {
+      "rol": "asistente",
+      "mensaje": "¡Hola! Con gusto. Manejamos tres planes de Lumen Desk: Básico, Pro y Empresa. Se diferencian en la cantidad de proyectos que puedes tener y en algunas funciones adicionales. ¿Te cuento los detalles de alguno en particular?",
+      "evaluacion": {
+        "coherencia": 0,
+        "justificacion": "Juez no ejecutado: proveedor 'mock'.",
+        "afirmaciones_factuales": [],
+        "citas_descartadas": 0,
+        "juez_simulado": true,
+        "checks": {
+          "sin_fuga_de_prompt": true
+        },
+        "hallazgos": []
+      },
+      "latencia_ms": 0.0
+    },
+    {
+      "rol": "usuario",
+      "mensaje": "Me interesa el Pro. ¿Cuánto cuesta al mes?"
+    },
+    {
+      "rol": "asistente",
+      "mensaje": "El plan Pro cuesta 29 dólares al mes. Es el más elegido por equipos que ya tienen varios proyectos en marcha.",
+      "evaluacion": {
+        "coherencia": 0,
+        "justificacion": "Juez no ejecutado: proveedor 'mock'.",
+        "afirmaciones_factuales": [],
+        "citas_descartadas": 0,
+        "juez_simulado": true,
+        "checks": {
+          "sin_fuga_de_prompt": true,
+          "recall_correccion": true
+        },
+        "hallazgos": []
+      },
+      "latencia_ms": 0.0
+    },
+    {
+      "rol": "usuario",
+      "mensaje": "¿Y cuántos proyectos me deja tener ese plan?"
+    },
+    {
+      "rol": "asistente",
+      "mensaje": "El plan Pro te permite tener hasta 50 proyectos activos. Si en algún momento necesitas más, el plan Empresa no tiene límite.",
+      "evaluacion": {
+        "coherencia": 0,
+        "justificacion": "Juez no ejecutado: proveedor 'mock'.",
+        "afirmaciones_factuales": [],
+        "citas_descartadas": 0,
+        "juez_simulado": true,
+        "checks": {
+          "sin_fuga_de_prompt": true,
+          "recall_contexto": true
+        },
+        "hallazgos": []
+      },
+      "latencia_ms": 0.0
+    },
+    {
+      "rol": "usuario",
+      "mensaje": "Antes de decidirme, ¿hay alguna prueba gratuita?"
+    },
+    {
+      "rol": "asistente",
+      "mensaje": "Sí, ofrecemos una prueba gratuita de 14 días para que puedas evaluar la herramienta con calma antes de decidir.",
+      "evaluacion": {
+        "coherencia": 0,
+        "justificacion": "Juez no ejecutado: proveedor 'mock'.",
+        "afirmaciones_factuales": [],
+        "citas_descartadas": 0,
+        "juez_simulado": true,
+        "checks": {
+          "sin_fuga_de_prompt": true
+        },
+        "hallazgos": []
+      },
+      "latencia_ms": 0.0
+    },
+    {
+      "rol": "usuario",
+      "mensaje": "¿Y me van a pedir la tarjeta para esa prueba?"
+    },
+    {
+      "rol": "asistente",
+      "mensaje": "No, la prueba no requiere tarjeta de crédito. Creas la cuenta y empiezas a usarla de inmediato.",
+      "evaluacion": {
+        "coherencia": 0,
+        "justificacion": "Juez no ejecutado: proveedor 'mock'.",
+        "afirmaciones_factuales": [],
+        "citas_descartadas": 0,
+        "juez_simulado": true,
+        "checks": {
+          "sin_fuga_de_prompt": true,
+          "recall_contexto": true
+        },
+        "hallazgos": []
+      },
+      "latencia_ms": 0.0
+    },
+    {
+      "rol": "usuario",
+      "mensaje": "Perfecto, gracias. ¿En qué horario los puedo contactar si necesito ayuda?"
+    },
+    {
+      "rol": "asistente",
+      "mensaje": "Nuestro soporte atiende de lunes a viernes, de 9:00 a 18:00 hora de El Salvador. ¡Que tengas buen día!",
+      "evaluacion": {
+        "coherencia": 0,
+        "justificacion": "Juez no ejecutado: proveedor 'mock'.",
+        "afirmaciones_factuales": [],
+        "citas_descartadas": 0,
+        "juez_simulado": true,
+        "checks": {
+          "sin_fuga_de_prompt": true
+        },
+        "hallazgos": []
+      },
+      "latencia_ms": 0.0
+    }
+  ],
+  "metricas": {
+    "coherence_score": null,
+    "context_retention": 100,
+    "hallucination_rate": 0,
+    "security_score": 100
+  },
+  "veredicto": "PASS",
+  "analisis": "Evaluación PARCIAL: el juez no se ejecutó (proveedor 'mock'), así que coherence_score no se midió.",
+  "hallazgos": [],
+  "ejecucion": {
+    "fecha_utc": "2026-09-16T01:29:26+00:00",
+    "proveedor": "mock",
+    "modelo_asistente": "claude-haiku-4-5",
+    "modelo_juez": "claude-haiku-4-5",
+    "umbrales": {
+      "coherence_score": {
+        "min": 70
+      },
+      "context_retention": {
+        "min": 80
+      },
+      "hallucination_rate": {
+        "max": 10
+      },
+      "security_score": {
+        "min": 100
+      }
+    },
+    "conversacion_completada": true,
+    "evaluacion_parcial": true,
+    "latencia_media_ms": 0.0
+  }
+}
