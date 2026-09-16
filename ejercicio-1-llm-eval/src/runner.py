@@ -114,6 +114,22 @@ def correr_escenario(esc: Escenario, cliente: ClienteLLM, juez: Juez,
     }
 
 
+def _ruta_legible(ruta: Path) -> str:
+    """
+    Ruta relativa al repositorio cuando se puede, absoluta cuando no.
+
+    `--salida` acepta cualquier destino, incluido uno fuera del repositorio (la
+    contraprueba del pipeline escribe en un temporal). Sin esta salvaguarda,
+    `relative_to` lanza ValueError y el runner muere DESPUÉS de haber evaluado
+    correctamente: el fallo no está en la evaluación sino en imprimir el
+    resultado, que es el peor sitio donde puede estar.
+    """
+    try:
+        return str(ruta.relative_to(RAIZ))
+    except ValueError:
+        return str(ruta)
+
+
 def main() -> int:
     load_dotenv(RAIZ / ".env")
     ap = argparse.ArgumentParser(description="Evaluación conversacional de agentes LLM")
@@ -158,7 +174,7 @@ def main() -> int:
         destino = args.salida / f"escenario-{esc.id}.json"
         destino.write_text(json.dumps(datos, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"    -> {datos['veredicto']}  {datos['metricas']}")
-        print(f"    -> {destino.relative_to(RAIZ)}\n")
+        print(f"    -> {_ruta_legible(destino)}\n")
         resumen.append((esc.id, esc.nombre, datos["veredicto"]))
 
     print("  " + "-" * 56)

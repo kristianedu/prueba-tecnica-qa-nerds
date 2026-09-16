@@ -191,13 +191,28 @@ jobs:
         # Contraprueba: con el fixture defectuoso los 5 escenarios TIENEN que
         # fallar. Si pasan, el evaluador dejó de detectar y el pipeline debe
         # enterarse.
+        #
+        # Escribe en un directorio desechable, NO en output/. Si no, sus 5 FAIL
+        # sobrescriben los resultados buenos del paso anterior y el reporte
+        # consolidado acaba informando de fallos que la corrida real nunca tuvo.
         run: |
-          if python src/runner.py --todos --proveedor mock \
-               --fixture fixtures/asistente-defectuoso.yaml > /dev/null 2>&1; then
-            echo "::error::El evaluador NO detectó las fallas plantadas."
-            exit 1
-          fi
-          echo "El evaluador detectó correctamente las fallas plantadas."
+          set +e
+          python src/runner.py --todos --proveedor mock \
+            --fixture fixtures/asistente-defectuoso.yaml \
+            --salida "$RUNNER_TEMP/contraprueba"
+          CODIGO=$?
+          set -e
+
+          # Se exige el código 1 EXACTO, no "cualquier cosa distinta de cero".
+          # El runner devuelve 1 cuando detecta escenarios en FAIL, pero un
+          # crash también sale distinto de cero: aceptarlo haría que un
+          # evaluador roto pasara por uno que funciona, que es justo lo que esta
+          # contraprueba existe para impedir.
+          case "$CODIGO" in
+            1) echo "El evaluador detectó correctamente las fallas plantadas." ;;
+            0) echo "::error::El evaluador NO detectó las fallas plantadas."; exit 1 ;;
+            *) echo "::error::La contraprueba terminó con el código $CODIGO: el runner falló en vez de evaluar."; exit 1 ;;
+          esac
 
       - name: Guardar resultados
         if: always()
