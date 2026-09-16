@@ -53,6 +53,9 @@ def leer_json(ruta: Path) -> Any | None:
 
 # ------------------------------------------------------------- Ejercicio 1
 
+ESCENARIOS_ESPERADOS = 5
+
+
 def recolectar_llm(entrada: Path) -> dict[str, Any]:
     archivos = sorted((entrada / "ejercicio-1").glob("escenario-*.json"))
     escenarios, hallazgos = [], []
@@ -83,8 +86,12 @@ def recolectar_llm(entrada: Path) -> dict[str, Any]:
         return round(sum(vals) / len(vals), 1) if vals else None
 
     completadas = sum(1 for e in escenarios if e["completada"])
+    # "Disponible" exige los cinco. Con dos de cinco —lo que deja un crash a
+    # mitad de la corrida— el reporte se generaría con los que hubiera y el
+    # pipeline saldría verde sobre una evaluación a medias.
     return {
-        "disponible": bool(escenarios),
+        "disponible": len(escenarios) >= ESCENARIOS_ESPERADOS,
+        "escenarios_encontrados": len(escenarios),
         "escenarios": escenarios,
         "hallazgos": hallazgos,
         "checks_ejecutados": sorted(checks_vistos),
@@ -279,7 +286,8 @@ def construir(entrada: Path) -> dict[str, Any]:
         },
         "faltantes": [
             nombre for nombre, presente in [
-                ("ejercicio-1 (evaluación LLM)", llm["disponible"]),
+                (f"ejercicio-1 (evaluación LLM: {llm['escenarios_encontrados']} de "
+                 f"{ESCENARIOS_ESPERADOS} escenarios)", llm["disponible"]),
                 ("ejercicio-2 (API)", api is not None),
                 ("ejercicio-3 (chatbot)", ui is not None),
             ] if not presente

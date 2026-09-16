@@ -110,3 +110,19 @@ def test_el_tope_de_salida_por_peticion_sugiere_bajar_max_tokens():
     assert "límite 1000, pedidos 1329" in d
     assert "Cuota DIARIA" not in d
     assert segundos_de_espera(Exception(TOPE_SALIDA)) is None   # no pide esperar
+
+
+# ------------------------------------------------ códigos de salida del runner
+
+def test_los_codigos_de_salida_no_pisan_el_del_crash():
+    """
+    Pasó en CI: el runner se cayó por cuota (excepción sin capturar → código 1)
+    y el pipeline lo leyó como "evaluó y encontró defectos" porque ese también
+    era 1. El job salió verde sin haber evaluado nada. Ningún código propio
+    puede valer 1.
+    """
+    import runner
+    propios = {runner.SALIDA_SIN_DEFECTOS, runner.SALIDA_ERROR_ARNES, runner.SALIDA_CON_DEFECTOS}
+    assert 1 not in propios
+    assert len(propios) == 3
+    assert runner.SALIDA_SIN_DEFECTOS == 0

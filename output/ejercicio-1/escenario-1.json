@@ -266,7 +266,7 @@
     }
   ],
   "ejecucion": {
-    "fecha_utc": "2026-09-16T22:56:03+00:00",
+    "fecha_utc": "2026-09-16T23:04:54+00:00",
     "proveedor": "groq",
     "modelo_asistente": "openai/gpt-oss-20b",
     "modelo_juez": "qwen/qwen3.8-27b",

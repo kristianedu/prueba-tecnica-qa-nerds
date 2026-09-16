@@ -43,9 +43,11 @@ cp ../.env.example ../.env     # y pon tu GROQ_API_KEY
 .venv/bin/python src/runner.py --todos --proveedor groq
 ```
 
-Salida en `../output/ejercicio-1/escenario-{1..5}.json`. El código de salida es 1
-si algún escenario termina en FAIL, para que el pipeline del Ejercicio 4 lo
-detecte.
+Salida en `../output/ejercicio-1/escenario-{1..5}.json`. Códigos de salida: **0**
+sin defectos, **3** si algún escenario terminó en FAIL, **2** si el arnés no pudo
+completar la evaluación (cuota, red, configuración). El 1 se deja libre a
+propósito: es el de un crash de Python, y si "con defectos" también fuera 1, el
+pipeline no podría distinguir una evaluación completa de una caída a mitad.
 
 Son 71 llamadas por corrida (30 del asistente, 30 del juez, 11 del usuario
 simulado — los 19 turnos literales no gastan ninguna) y unos 6 minutos. La caché

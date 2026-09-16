@@ -191,16 +191,18 @@ jobs:
           CODIGO=$?
           set -e
 
-          # El runner devuelve 1 cuando algún escenario termina en FAIL. Eso NO
-          # es un fallo del pipeline: es el modelo bajo prueba mostrando un
-          # defecto, que es exactamente lo que esta evaluación existe para
-          # encontrar, y va al reporte consolidado. Solo un crash (cualquier
-          # otro código) significa que el arnés falló y debe poner el job en
-          # rojo.
+          # 0 = evaluó y no hubo defectos; 3 = evaluó y el modelo mostró
+          # defectos (eso NO es un fallo del pipeline: es el hallazgo que la
+          # evaluación existe para producir, y va al reporte). Cualquier otro
+          # código —2 es el error de arnés del runner, 1 es un crash de Python—
+          # significa que la evaluación no se completó y el job debe ir rojo.
+          #
+          # Antes se aceptaba el 1 como "con defectos" y un crash por cuota a
+          # mitad de la corrida dejó el job en verde sin haber evaluado nada.
           case "$CODIGO" in
             0) echo "Evaluación completa: sin defectos en el modelo." ;;
-            1) echo "Evaluación completa: el modelo mostró defectos. Ver el reporte consolidado." ;;
-            *) echo "::error::El runner falló con el código $CODIGO."; exit 1 ;;
+            3) echo "Evaluación completa: el modelo mostró defectos. Ver el reporte consolidado." ;;
+            *) echo "::error::La evaluación no se completó (código $CODIGO). Revisa el diagnóstico de arriba."; exit 1 ;;
           esac
 
       - name: Guardar resultados

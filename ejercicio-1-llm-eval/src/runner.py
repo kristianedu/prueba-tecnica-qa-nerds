@@ -29,11 +29,19 @@ from config import Escenario, cargar_escenario, cargar_todos
 from evaluator import metrics
 from evaluator.deterministic import evaluar_turno
 from evaluator.judge import Juez
-from llm_client import ClienteLLM, Mensaje
+from llm_client import ClienteLLM, ErrorLLM, Mensaje
 from simulated_user import UsuarioSimulado
 
 RAIZ = Path(__file__).resolve().parents[2]
 DIR_SALIDA = RAIZ / "output" / "ejercicio-1"
+
+# Códigos de salida. El 1 NO se usa a propósito: es el que devuelve Python ante
+# una excepción sin capturar, y si "encontré defectos" también fuera 1, un crash
+# a mitad de la corrida sería indistinguible de una evaluación completa con
+# hallazgos. Pasó en CI: el job salió verde tras caerse por cuota.
+SALIDA_SIN_DEFECTOS = 0
+SALIDA_ERROR_ARNES = 2      # el evaluador no pudo terminar (cuota, red, config)
+SALIDA_CON_DEFECTOS = 3     # evaluó los 5 escenarios y alguno terminó en FAIL
 
 
 def _envolver(texto: str, sangria: str = " " * 15, ancho: int = 92) -> str:
@@ -297,8 +305,15 @@ def main() -> int:
         print(f"  {i}. {nombre:34s} {v}")
     fallidos = sum(1 for _, _, v in resumen if v == "FAIL")
     print(f"  {len(resumen) - fallidos}/{len(resumen)} escenarios sin FAIL\n")
-    return 1 if fallidos else 0
+    return SALIDA_CON_DEFECTOS if fallidos else SALIDA_SIN_DEFECTOS
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except ErrorLLM as exc:
+        # Fallo del arnés, no del modelo: se informa sin traceback —el mensaje
+        # ya trae el diagnóstico— y con un código propio para que el pipeline
+        # lo trate como lo que es.
+        print(f"\nLa evaluación no pudo completarse.\n{exc}", file=sys.stderr)
+        raise SystemExit(SALIDA_ERROR_ARNES)
