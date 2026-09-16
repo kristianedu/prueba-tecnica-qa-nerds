@@ -19,3 +19,6 @@ ejercicio-2-3-playwright/playwright-report/
 
 # Sistema
 .DS_Store
+
+# El enunciado de la prueba es material de la empresa: no se publica.
+*.pdf
