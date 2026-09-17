@@ -126,3 +126,28 @@ def test_los_codigos_de_salida_no_pisan_el_del_crash():
     assert 1 not in propios
     assert len(propios) == 3
     assert runner.SALIDA_SIN_DEFECTOS == 0
+
+
+# ------------------------------------------------- qué se reintenta y qué no
+
+@pytest.mark.parametrize("mensaje,reintentable", [
+    ("Error code: 429 - rate limit", True),
+    ("Error code: 503 - service unavailable", True),
+    ("connection reset by peer", True),           # red: sin código, se reintenta
+    ("Error code: 400 - Failed to validate JSON", False),
+    ("Error code: 401 - invalid api key", False),
+    ("Error code: 404 - model not found", False),
+])
+def test_solo_se_reintenta_lo_transitorio(mensaje, reintentable):
+    """
+    Un 400 por JSON inválido se reintentaba tres veces con la misma petición.
+    Solo el 429 y los 5xx pueden cambiar de resultado al repetirse.
+    """
+    from llm_client import _es_reintentable
+    assert _es_reintentable(Exception(mensaje)) is reintentable
+
+
+def test_el_400_de_json_dice_que_el_modelo_no_sirve_de_juez():
+    d = _diagnostico(Exception("Error code: 400 - Failed to validate JSON. Please try again"),
+                     "groq", "openai/gpt-oss-safeguard-20b")
+    assert "no sirve de juez" in d and "--modelo-juez" in d

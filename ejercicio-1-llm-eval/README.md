@@ -66,6 +66,10 @@ los 30 turnos.
 | `qwen/qwen3.8-27b` | 1K | 200K |
 | `groq/compound` y `-mini` | 250 | *sin límite* |
 
+**La cuota "diaria" es una ventana móvil de 24 h**, no un reinicio a medianoche
+UTC: cada token consumido se libera 24 h después. Un intento a las 00:00 tras
+un día de uso intenso encontró 198K de 200K todavía ocupados.
+
 **Cuidado con ese "sin límite".** Los modelos *compound* son sistemas agénticos
 que por debajo llaman a `openai/gpt-oss-120b`, así que consumen su cuota: al
 pedirles una evaluación con la cuota del 120b agotada, el error que devuelven

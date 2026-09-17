@@ -43,7 +43,9 @@ Las conversaciones evaluadas están en [`output/ejercicio-1/`](output/ejercicio-
 y las capturas del chatbot en [`output/ejercicio-3/capturas/`](output/ejercicio-3/capturas/).
 Si el último run está en rojo por *"cuota diaria de tokens agotada"*, es el
 límite del tier gratuito de Groq —compartido entre CI y uso local—, no un fallo
-de la suite: se relanza pasadas las 00:00 UTC.
+de la suite. La cuota es una **ventana móvil de 24 h**, no un reinicio a
+medianoche: se libera a medida que envejece el consumo, así que basta relanzar
+el run unas horas después, o correrlo con clave propia (siguiente punto).
 
 **Con clave propia, el pipeline al completo.** Hacer un *fork*, guardar una clave
 gratuita de https://console.groq.com como secret `GROQ_API_KEY` y, en *Actions*,

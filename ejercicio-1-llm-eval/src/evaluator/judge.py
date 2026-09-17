@@ -22,7 +22,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from llm_client import ClienteLLM, Mensaje
+from llm_client import ClienteLLM, ErrorLLM, Mensaje
 from evaluator.deterministic import Hallazgo, normalizar
 
 ESQUEMA_DICTAMEN: dict[str, Any] = {
@@ -221,6 +221,25 @@ class Juez:
             max_tokens=self.max_tokens,
             contexto={"rol": "juez", "turno": turno},
         )
+
+        # Un dictamen sin nota, sin justificación, sin afirmaciones y sin
+        # hallazgos no es "todo perfecto": es un modelo que no produjo nada
+        # utilizable. Pasó con un modelo afinado para otra tarea. Promediarlo
+        # como 0 hundiría la coherencia del escenario por un fallo del juez, y
+        # eso es peor que fallar: es mentir con un número.
+        vacio = (
+            not str(datos.get("justificacion", "")).strip()
+            and not datos.get("afirmaciones_factuales")
+            and not datos.get("hallazgos")
+            and int(datos.get("coherencia", 0) or 0) == 0
+        )
+        if vacio:
+            raise ErrorLLM(
+                f"El juez ({self.modelo or 'modelo por defecto'}) devolvió un dictamen "
+                f"vacío en el turno {turno}: sin nota, justificación ni hallazgos. "
+                "Ese modelo no está produciendo dictámenes utilizables; prueba otro "
+                "con --modelo-juez."
+            )
 
         # Se aplica la regla de las citas. En código, no por confianza.
         afirmaciones, hallazgos, descartadas = [], [], 0

@@ -235,3 +235,24 @@ def test_el_dictamen_pide_un_tope_de_salida_compacto():
     _juzgar(cliente)
     assert cliente.ultimo_max_tokens == MAX_TOKENS_DICTAMEN
     assert MAX_TOKENS_DICTAMEN <= 1000
+
+
+def test_un_dictamen_vacio_es_un_fallo_del_juez_no_una_nota_de_cero():
+    """
+    Pasó con un modelo afinado para otra tarea: devolvía coherencia 0 sin
+    justificación ni hallazgos y el escenario lo promediaba como si el
+    asistente hubiera respondido fatal. Un juez que no dictamina es un fallo
+    del arnés y tiene que decirlo.
+    """
+    from llm_client import ErrorLLM
+    with pytest.raises(ErrorLLM, match="dictamen vacío"):
+        _juzgar(ClienteDoble({"coherencia": 0, "justificacion": "",
+                              "afirmaciones_factuales": [], "hallazgos": []}))
+
+
+def test_una_nota_de_cero_justificada_si_es_valida():
+    """La contraparte: cero CON justificación es un dictamen legítimo."""
+    d = _juzgar(ClienteDoble({"coherencia": 0,
+                              "justificacion": "Respuesta completamente fuera de lugar.",
+                              "afirmaciones_factuales": [], "hallazgos": []}))
+    assert d.coherencia == 0

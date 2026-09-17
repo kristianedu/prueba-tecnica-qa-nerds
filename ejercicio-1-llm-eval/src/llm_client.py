@@ -237,6 +237,15 @@ class ClienteLLM:
                 espera = segundos_de_espera(exc)
                 agotado = intento == self.reintentos - 1
 
+                # Un 4xx que no sea 429 es un rechazo de la petición tal cual
+                # es —modelo inexistente, credencial mala, salida que no valida
+                # como JSON—. Repetirla idéntica tres veces no cambia nada.
+                if not _es_reintentable(exc):
+                    raise ErrorLLM(
+                        f"{self.proveedor}/{modelo} falló: {exc}"
+                        f"{_diagnostico(exc, self.proveedor, modelo)}"
+                    ) from exc
+
                 # Hay dos clases de límite y se tratan al revés:
                 #
                 #   - Por minuto: el proveedor pide segundos. Esperarlos
@@ -353,6 +362,15 @@ def segundos_de_espera(exc: Exception) -> float | None:
     return int(m.group(1) or 0) * 60 + float(m.group(2))
 
 
+def _es_reintentable(exc: Exception) -> bool:
+    """429 y 5xx sí; cualquier otro 4xx, no."""
+    m = re.search(r"Error code: (\d{3})", str(exc))
+    if not m:
+        return True                      # errores de red y similares: reintentar
+    codigo = int(m.group(1))
+    return codigo == 429 or codigo >= 500
+
+
 def _diagnostico(exc: Exception, proveedor: str, modelo: str) -> str:
     """
     Explica qué hacer, según la causa real.
@@ -365,6 +383,12 @@ def _diagnostico(exc: Exception, proveedor: str, modelo: str) -> str:
     texto = str(exc)
     bajo = texto.lower()
 
+    if "failed to validate json" in bajo or "json_validate_failed" in bajo:
+        return (
+            f"\n\n{modelo} no produce JSON válido bajo el formato estructurado que"
+            "\nexige el dictamen. No es transitorio: ese modelo no sirve de juez."
+            "\nUsa otro con --modelo-juez."
+        )
     if "request too large" in bajo or "otpm" in bajo or "output tokens per minute" in bajo:
         lim = re.search(r"Limit (\d+), Requested (\d+)", texto)
         cifras = f" (límite {lim.group(1)}, pedidos {lim.group(2)})" if lim else ""
