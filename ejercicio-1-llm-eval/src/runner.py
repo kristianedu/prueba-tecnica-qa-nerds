@@ -246,8 +246,9 @@ def main() -> int:
     ap.add_argument("--modelo", help="modelo del asistente")
     ap.add_argument("--modelo-juez", help="modelo del juez")
     ap.add_argument("--max-tokens-juez", type=int, default=None,
-                    help="tope de salida del dictamen (por defecto 700; bájalo si el "
-                         "proveedor limita los tokens de salida por minuto)")
+                    help="tope de salida del dictamen (por defecto 2048, o la variable "
+                         "JUDGE_MAX_TOKENS). Con qwen en Groq usa 700: admite solo "
+                         "1.000 tokens de salida por minuto")
     ap.add_argument("--sin-cache", action="store_true",
                     help="fuerza llamadas nuevas al modelo y las guarda, "
                          "dejando esta corrida como base para reevaluar gratis")
@@ -279,10 +280,11 @@ def main() -> int:
         proveedor=args.proveedor, modelo=args.modelo,
         refrescar=args.sin_cache,
     )
+    tope_juez = args.max_tokens_juez or int(os.getenv("JUDGE_MAX_TOKENS") or 0)
     juez = Juez(
         cliente,
         modelo=args.modelo_juez or os.getenv("JUDGE_MODEL") or cliente.modelo,
-        **({"max_tokens": args.max_tokens_juez} if args.max_tokens_juez else {}),
+        **({"max_tokens": tope_juez} if tope_juez else {}),
     )
     usuario = UsuarioSimulado(cliente)
 

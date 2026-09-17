@@ -228,13 +228,29 @@ def test_el_juez_conoce_las_capacidades_del_asistente():
     assert "NO es inventar" in system
 
 
-def test_el_dictamen_pide_un_tope_de_salida_compacto():
-    """Ver MAX_TOKENS_DICTAMEN: pedir 2.048 hacía que qwen rechazara la petición."""
+def test_el_tope_por_defecto_deja_sitio_al_razonamiento():
+    """
+    Regresión de un error propio. El tope se bajó a 700 para que cupiera en
+    qwen, y eso rompió a gpt-oss-120b: gasta 500-620 tokens razonando del mismo
+    presupuesto, al JSON le quedaban ~80, salía cortado, y la corrida de CI moría
+    por "JSON inválido" en todos los intentos. (Esta misma prueba afirmaba antes
+    `<= 1000` — es decir, protegía el error.)
+    """
     from evaluator.judge import MAX_TOKENS_DICTAMEN
     cliente = ClienteDoble(_dictamen())
     _juzgar(cliente)
     assert cliente.ultimo_max_tokens == MAX_TOKENS_DICTAMEN
-    assert MAX_TOKENS_DICTAMEN <= 1000
+    assert MAX_TOKENS_DICTAMEN >= 1500   # ~620 de razonamiento + el JSON + margen
+
+
+def test_el_tope_se_puede_bajar_para_modelos_que_lo_exigen():
+    """qwen en Groq rechaza cualquier petición que declare más de 1.000 de salida."""
+    cliente = ClienteDoble(_dictamen())
+    Juez(cliente, max_tokens=700).evaluar(
+        turno=1, knowledge_base=["x"], historial=[Mensaje("user", "hola")],
+        respuesta=RESPUESTA, objetivo_escenario="x",
+    )
+    assert cliente.ultimo_max_tokens == 700
 
 
 def test_un_dictamen_vacio_es_un_fallo_del_juez_no_una_nota_de_cero():

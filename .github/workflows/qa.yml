@@ -185,6 +185,9 @@ jobs:
           LLM_PROVIDER: groq
           LLM_MODEL: ${{ vars.LLM_MODEL || 'openai/gpt-oss-20b' }}
           JUDGE_MODEL: ${{ vars.JUDGE_MODEL || 'openai/gpt-oss-120b' }}
+          # Vacío = el valor por defecto del juez (2048). Hay que bajarlo a 700
+          # si JUDGE_MODEL es qwen/qwen3.8-27b, que limita la salida por minuto.
+          JUDGE_MAX_TOKENS: ${{ vars.JUDGE_MAX_TOKENS || '' }}
         run: |
           set +e
           python src/runner.py --todos --proveedor groq

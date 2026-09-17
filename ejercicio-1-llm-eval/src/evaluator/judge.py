@@ -162,12 +162,18 @@ class DictamenTurno:
         }
 
 
-# Tope de salida del dictamen. Es compacto por diseño —una nota, dos frases de
-# justificación, unas pocas afirmaciones y hallazgos— y 700 tokens sobran. Pedir
-# más no mejora nada y algunos proveedores rechazan la petición de entrada por
-# el max_tokens declarado: qwen en Groq admite 1.000 tokens de salida por minuto
-# y con 2.048 devolvía "Request too large" sin llegar a llamar al modelo.
-MAX_TOKENS_DICTAMEN = 700
+# Tope de salida del dictamen. El JSON en sí es compacto —una nota, dos frases,
+# unas pocas afirmaciones—, pero el tope no es solo para él: los modelos que
+# razonan antes de responder (gpt-oss) gastan del MISMO presupuesto entre 500 y
+# 620 tokens pensando. Con un tope de 700 al JSON le quedaban ~80 tokens, se
+# cortaba a mitad en los turnos con varias afirmaciones, y la corrida moría por
+# "JSON inválido" en todos los intentos.
+#
+# El valor correcto depende del modelo, así que es configurable (variable
+# JUDGE_MAX_TOKENS o --max-tokens-juez). Caso conocido que pide bajarlo: qwen en
+# Groq admite 1.000 tokens de salida por minuto y rechaza de entrada cualquier
+# petición que declare más; con él hay que usar 700.
+MAX_TOKENS_DICTAMEN = 2048
 
 
 class Juez:

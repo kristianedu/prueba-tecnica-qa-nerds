@@ -232,3 +232,14 @@ def test_los_reintentos_varian_la_temperatura(tmp_path):
     datos, _ = cliente.completar_json("s", [Mensaje("user", "x")], {"type": "object"})
     assert datos == {"ok": True}
     assert temperaturas[0] == 0 and temperaturas[1] > 0
+
+
+def test_el_diagnostico_de_json_invalido_sugiere_subir_el_tope():
+    """
+    El JSON cortado por un tope corto —no un modelo inútil— fue la causa real
+    del fallo en CI, y el diagnóstico anterior solo sugería cambiar de modelo.
+    """
+    d = _diagnostico(Exception("Error code: 400 - Failed to validate JSON"),
+                     "groq", "openai/gpt-oss-120b")
+    assert "--max-tokens-juez" in d and "JUDGE_MAX_TOKENS" in d
+    assert "razonan" in d

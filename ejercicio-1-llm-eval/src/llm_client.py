@@ -434,9 +434,11 @@ def _diagnostico(exc: Exception, proveedor: str, modelo: str) -> str:
     if "failed to validate json" in bajo or "json_validate_failed" in bajo:
         return (
             f"\n\n{modelo} devolvió JSON inválido en todos los intentos, incluso con"
-            "\nvariación entre ellos. Un fallo aislado se recupera solo; uno"
-            "\nsistemático indica que ese modelo no sirve de juez. Usa otro con"
-            "\n--modelo-juez."
+            "\nvariación entre ellos. Dos causas posibles:"
+            "\n  - El tope de salida es corto. Los modelos que razonan (gpt-oss)"
+            "\n    gastan cientos de tokens pensando del mismo presupuesto, y el"
+            "\n    JSON sale cortado. Sube --max-tokens-juez (o JUDGE_MAX_TOKENS)."
+            "\n  - El modelo no sirve de juez. Usa otro con --modelo-juez."
         )
     if "request too large" in bajo or "otpm" in bajo or "output tokens per minute" in bajo:
         lim = re.search(r"Limit (\d+), Requested (\d+)", texto)
