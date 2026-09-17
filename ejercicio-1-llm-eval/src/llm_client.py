@@ -227,6 +227,7 @@ class ClienteLLM:
         inicio = time.perf_counter()
         ultimo_error: Exception | None = None
         for intento in range(self.reintentos):
+            self._intento = intento
             try:
                 texto, t_in, t_out = self._llamar(
                     system, mensajes, modelo, max_tokens, esquema
@@ -238,8 +239,9 @@ class ClienteLLM:
                 agotado = intento == self.reintentos - 1
 
                 # Un 4xx que no sea 429 es un rechazo de la petición tal cual
-                # es —modelo inexistente, credencial mala, salida que no valida
-                # como JSON—. Repetirla idéntica tres veces no cambia nada.
+                # es —modelo inexistente, credencial mala—. Repetirla idéntica
+                # no cambia nada. (El JSON inválido es la excepción: ver
+                # _es_reintentable.)
                 if not _es_reintentable(exc):
                     raise ErrorLLM(
                         f"{self.proveedor}/{modelo} falló: {exc}"
@@ -332,14 +334,30 @@ class ClienteLLM:
                 "\n\nResponde ÚNICAMENTE con un objeto JSON válido que cumpla "
                 f"este esquema, sin texto alrededor:\n{json.dumps(esquema, ensure_ascii=False)}"
             )
-        r = self._sdk.chat.completions.create(
-            model=modelo,
-            max_tokens=max_tokens,
-            temperature=0,
-            messages=[{"role": "system", "content": instruccion}]
-                     + [m.como_api() for m in mensajes],
-            **({"response_format": {"type": "json_object"}} if esquema else {}),
-        )
+        # Temperatura 0 en el primer intento, para reproducibilidad. Si ese
+        # intento falló, repetirlo a 0 tiende a reproducir el mismo fallo —
+        # típicamente un JSON que no valida—, así que los reintentos introducen
+        # algo de variación.
+        temperatura = 0 if getattr(self, "_intento", 0) == 0 else 0.4
+        try:
+            r = self._sdk.chat.completions.create(
+                model=modelo,
+                max_tokens=max_tokens,
+                temperature=temperatura,
+                messages=[{"role": "system", "content": instruccion}]
+                         + [m.como_api() for m in mensajes],
+                **({"response_format": {"type": "json_object"}} if esquema else {}),
+            )
+        except Exception as exc:                          # noqa: BLE001
+            # Groq valida el JSON en su lado y, si no pasa, devuelve un 400 con
+            # la generación rechazada en `failed_generation`. A menudo es JSON
+            # correcto con algo de texto alrededor, que nuestro extractor sí
+            # sabe leer. Tirar un dictamen legible por un validador estricto es
+            # perder una llamada pagada.
+            rescatado = _rescatar_generacion(exc) if esquema is not None else None
+            if rescatado is None:
+                raise
+            return rescatado, 0, 0
         uso = getattr(r, "usage", None)
         return (
             r.choices[0].message.content or "",
@@ -363,12 +381,42 @@ def segundos_de_espera(exc: Exception) -> float | None:
 
 
 def _es_reintentable(exc: Exception) -> bool:
-    """429 y 5xx sí; cualquier otro 4xx, no."""
+    """
+    429 y 5xx sí; cualquier otro 4xx, no — salvo el JSON inválido.
+
+    Un 400 por JSON que no valida depende del muestreo: un modelo apto como juez
+    lo produce muy de vez en cuando, y el reintento (con algo de temperatura)
+    suele salir bien. Tratarlo como fatal tumbó una corrida entera por una sola
+    generación mala. Si el modelo no sirve de verdad, fallará en todos los
+    intentos y el diagnóstico lo dirá.
+    """
+    texto = str(exc).lower()
+    if "failed to validate json" in texto or "json_validate_failed" in texto:
+        return True
     m = re.search(r"Error code: (\d{3})", str(exc))
     if not m:
         return True                      # errores de red y similares: reintentar
     codigo = int(m.group(1))
     return codigo == 429 or codigo >= 500
+
+
+def _rescatar_generacion(exc: Exception) -> str | None:
+    """
+    Recupera la generación que el proveedor rechazó por no validar como JSON,
+    si nuestro extractor tolerante consigue leer de ella un objeto.
+    """
+    cuerpo = getattr(exc, "body", None)
+    if not isinstance(cuerpo, dict):
+        return None
+    error = cuerpo.get("error", cuerpo)
+    generado = error.get("failed_generation") if isinstance(error, dict) else None
+    if not isinstance(generado, str) or not generado.strip():
+        return None
+    try:
+        datos = json.loads(_recortar_json(generado))
+    except json.JSONDecodeError:
+        return None
+    return generado if isinstance(datos, dict) else None
 
 
 def _diagnostico(exc: Exception, proveedor: str, modelo: str) -> str:
@@ -385,9 +433,10 @@ def _diagnostico(exc: Exception, proveedor: str, modelo: str) -> str:
 
     if "failed to validate json" in bajo or "json_validate_failed" in bajo:
         return (
-            f"\n\n{modelo} no produce JSON válido bajo el formato estructurado que"
-            "\nexige el dictamen. No es transitorio: ese modelo no sirve de juez."
-            "\nUsa otro con --modelo-juez."
+            f"\n\n{modelo} devolvió JSON inválido en todos los intentos, incluso con"
+            "\nvariación entre ellos. Un fallo aislado se recupera solo; uno"
+            "\nsistemático indica que ese modelo no sirve de juez. Usa otro con"
+            "\n--modelo-juez."
         )
     if "request too large" in bajo or "otpm" in bajo or "output tokens per minute" in bajo:
         lim = re.search(r"Limit (\d+), Requested (\d+)", texto)

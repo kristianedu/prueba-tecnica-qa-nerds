@@ -134,20 +134,101 @@ def test_los_codigos_de_salida_no_pisan_el_del_crash():
     ("Error code: 429 - rate limit", True),
     ("Error code: 503 - service unavailable", True),
     ("connection reset by peer", True),           # red: sin código, se reintenta
-    ("Error code: 400 - Failed to validate JSON", False),
+    # El 400 por JSON depende del muestreo. Tratarlo como fatal tumbó una
+    # corrida real de CI por UNA generación mala de un modelo que había emitido
+    # cientos de dictámenes válidos.
+    ("Error code: 400 - Failed to validate JSON", True),
     ("Error code: 401 - invalid api key", False),
     ("Error code: 404 - model not found", False),
+    ("Error code: 400 - invalid request", False),
 ])
-def test_solo_se_reintenta_lo_transitorio(mensaje, reintentable):
-    """
-    Un 400 por JSON inválido se reintentaba tres veces con la misma petición.
-    Solo el 429 y los 5xx pueden cambiar de resultado al repetirse.
-    """
+def test_solo_se_reintenta_lo_que_puede_cambiar(mensaje, reintentable):
     from llm_client import _es_reintentable
     assert _es_reintentable(Exception(mensaje)) is reintentable
 
 
-def test_el_400_de_json_dice_que_el_modelo_no_sirve_de_juez():
+def test_el_400_de_json_sistematico_dice_que_el_modelo_no_sirve_de_juez():
     d = _diagnostico(Exception("Error code: 400 - Failed to validate JSON. Please try again"),
                      "groq", "openai/gpt-oss-safeguard-20b")
+    assert "todos los intentos" in d
     assert "no sirve de juez" in d and "--modelo-juez" in d
+
+
+# ------------------------------------ rescate de la generación rechazada
+
+class _ErrorConCuerpo(Exception):
+    """Imita el BadRequestError del SDK: mensaje + `body` con el detalle."""
+    def __init__(self, generado):
+        super().__init__("Error code: 400 - Failed to validate JSON")
+        self.body = {"error": {"code": "json_validate_failed",
+                               "failed_generation": generado}}
+
+
+def test_se_rescata_un_dictamen_legible_que_el_proveedor_rechazo():
+    """
+    Groq valida el JSON con un criterio más estricto que el nuestro: un objeto
+    correcto con una frase delante no le sirve, pero a nuestro extractor sí.
+    """
+    from llm_client import _rescatar_generacion
+    texto = 'Aquí va el dictamen:\n{"coherencia": 90, "justificacion": "ok", ' \
+            '"afirmaciones_factuales": [], "hallazgos": []}'
+    assert _rescatar_generacion(_ErrorConCuerpo(texto)) == texto
+
+
+@pytest.mark.parametrize("generado", [
+    "esto no tiene JSON por ningún lado",
+    '{"coherencia": 90, "justificacion": "cortado a la mit',
+    "",
+    None,
+])
+def test_no_se_rescata_lo_ilegible(generado):
+    from llm_client import _rescatar_generacion
+    assert _rescatar_generacion(_ErrorConCuerpo(generado)) is None
+
+
+def test_el_cliente_usa_la_generacion_rescatada_en_vez_de_fallar(tmp_path):
+    """Extremo a extremo por el cliente, con un SDK falso que rechaza el JSON."""
+    import json as _json
+    from llm_client import ClienteLLM, Mensaje
+
+    dictamen = {"coherencia": 88, "justificacion": "bien",
+                "afirmaciones_factuales": [], "hallazgos": []}
+
+    class _Completions:
+        def create(self, **_):
+            raise _ErrorConCuerpo("Dictamen: " + _json.dumps(dictamen))
+
+    class _SDK:
+        chat = type("C", (), {"completions": _Completions()})()
+
+    cliente = ClienteLLM(proveedor="groq", directorio_cache=tmp_path)
+    cliente._sdk = _SDK()
+    datos, _ = cliente.completar_json("s", [Mensaje("user", "x")], {"type": "object"})
+    assert datos == dictamen
+
+
+def test_los_reintentos_varian_la_temperatura(tmp_path):
+    """
+    A temperatura 0 un reintento tiende a repetir la misma generación inválida.
+    El primer intento es determinista; los siguientes, no.
+    """
+    from llm_client import ClienteLLM, Mensaje
+    temperaturas = []
+
+    class _Completions:
+        def create(self, **kw):
+            temperaturas.append(kw["temperature"])
+            if len(temperaturas) < 2:
+                raise Exception("Error code: 400 - Failed to validate JSON")
+            msg = type("M", (), {"content": '{"ok": true}'})()
+            return type("R", (), {"choices": [type("Ch", (), {"message": msg})()],
+                                  "usage": None})()
+
+    class _SDK:
+        chat = type("C", (), {"completions": _Completions()})()
+
+    cliente = ClienteLLM(proveedor="groq", directorio_cache=tmp_path)
+    cliente._sdk = _SDK()
+    datos, _ = cliente.completar_json("s", [Mensaje("user", "x")], {"type": "object"})
+    assert datos == {"ok": True}
+    assert temperaturas[0] == 0 and temperaturas[1] > 0
